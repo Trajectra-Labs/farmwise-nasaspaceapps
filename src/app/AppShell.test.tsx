@@ -26,7 +26,7 @@ describe('AppShell', () => {
   it('shows Data & Evidence at /evidence', () => {
     renderAt('/evidence')
     expect(screen.getByRole('heading', { level: 1, name: 'Data & Evidence' })).toBeInTheDocument()
-    expect(screen.getByText('NASA POWER snapshot not loaded yet')).toBeInTheDocument()
+    expect(screen.getAllByText(/offline snapshot/).length).toBeGreaterThan(0)
   })
 
   it('links the FarmWise brand to the Dashboard in header and sidebar', () => {

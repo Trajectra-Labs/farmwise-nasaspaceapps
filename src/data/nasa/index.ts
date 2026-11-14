@@ -1,29 +1,5 @@
-import type { ClimateContext, FarmProfile } from '../../contracts/farmwise'
-
-export type NasaSnapshotManifest = {
-  status: 'not_loaded' | 'loaded'
-  datasets: {
-    id: string
-    name: string
-    url: string
-    coordinates: string
-    period: string
-    units: string
-    retrievedAt: string
-  }[]
-}
-
-/** Placeholder: no real NASA POWER snapshot is committed yet, so no datasets are listed. */
-export const nasaSnapshotManifest: NasaSnapshotManifest = { status: 'not_loaded', datasets: [] }
-
-/** Placeholder: returns no numbers (null, never zero) until a real snapshot is loaded. */
-export function getClimateContext(farm: FarmProfile): ClimateContext {
-  return {
-    locationId: farm.id,
-    evidence: [],
-    annualRainfallMm: null,
-    meanTemperatureC: null,
-    observedPeriod: 'Not loaded',
-    snapshot: true,
-  }
-}
+export { nasaSnapshotManifest, powerManifest } from './manifest'
+export type { NasaSnapshotManifest, PowerManifest } from './manifest'
+export { getClimateContext, haversineKm, snapshotClimate, snapshotEvidence, snapshotPoint, SNAPSHOT_FAR_KM, SNAPSHOT_MAX_KM, SPATIAL_SCALE } from './climate'
+export { normalizePower, buildEvidence } from './normalize'
+export type { NormalizedClimate, MonthlyPoint, AnnualRainfall } from './normalize'

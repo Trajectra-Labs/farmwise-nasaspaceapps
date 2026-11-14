@@ -1,0 +1,89 @@
+.fm-picker {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.fm-map {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: var(--color-elevated);
+  min-height: 280px;
+}
+
+.fm-map__canvas {
+  height: 320px;
+  width: 100%;
+  z-index: 0;
+}
+
+.fm-map__placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 280px;
+  padding: var(--space-4);
+  color: var(--color-text-2);
+  font-size: var(--font-caption);
+}
+
+.fm-pin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 2px var(--color-accent);
+  box-sizing: border-box;
+}
+
+.fm-notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-control);
+  background: var(--color-warning-soft);
+  color: var(--color-warning);
+  font-size: var(--font-caption);
+}
+
+.fm-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.fm-fields .field {
+  margin-bottom: 0;
+}
+
+.fm-fields input {
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-text-2);
+  border-radius: var(--radius-control);
+}
+
+.fm-fields input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.fm-helper {
+  margin: 0;
+  color: var(--color-text-2);
+  font-size: var(--font-caption);
+}
+
+.fm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.fm-selected {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}

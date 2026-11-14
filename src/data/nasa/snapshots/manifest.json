@@ -1,0 +1,60 @@
+{
+  "dataset": "NASA POWER monthly point data (AG community)",
+  "farmName": "Nakuru demo farm, Kenya",
+  "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M,T2M_MAX,T2M_MIN,PRECTOTCORR&community=AG&latitude=-0.3031&longitude=36.08&start=2014&end=2023&format=JSON",
+  "documentationUrl": "https://power.larc.nasa.gov/docs/services/api/temporal/monthly/",
+  "snapshotFile": "power-monthly-nakuru-2014-2023.json",
+  "requested": {
+    "lat": -0.3031,
+    "lon": 36.08
+  },
+  "returned": {
+    "lon": 36.08,
+    "lat": -0.303,
+    "elevationM": 2338.05
+  },
+  "period": {
+    "start": 2014,
+    "end": 2023,
+    "temporalResolution": "monthly"
+  },
+  "parameters": {
+    "T2M": {
+      "units": "C",
+      "longName": "Temperature at 2 Meters"
+    },
+    "T2M_MAX": {
+      "units": "C",
+      "longName": "Temperature at 2 Meters Maximum"
+    },
+    "T2M_MIN": {
+      "units": "C",
+      "longName": "Temperature at 2 Meters Minimum"
+    },
+    "PRECTOTCORR": {
+      "units": "mm/day",
+      "longName": "Precipitation Corrected"
+    }
+  },
+  "fillValue": -999,
+  "retrievedAt": "2026-11-14T22:16:30.311Z",
+  "apiVersion": "v2.10.0",
+  "sourceText": "NASA/POWER Source Native Resolution Monthly and Annual",
+  "responseHeader": {
+    "title": "NASA/POWER Source Native Resolution Monthly and Annual",
+    "api": {
+      "version": "v2.10.0",
+      "name": "POWER Monthly and Annual API"
+    },
+    "sources": [
+      "MERRA2",
+      "POWER"
+    ],
+    "fill_value": -999,
+    "time_standard": "LST",
+    "start": "20140101",
+    "end": "20231231"
+  },
+  "messages": [],
+  "spatialResolutionNote": "NASA POWER documentation (https://power.larc.nasa.gov/docs/methodology/data/sources_meteorology/) states the primary meteorological source is a 1/2 degree latitude by 5/8 degree longitude grid from GMAO MERRA-2. The response header lists the sources as MERRA2 and POWER. Values are grid-cell averages, not measurements at the farm. Precipitation here is PRECTOTCORR (bias-corrected); POWER documents the higher-resolution GPM IMERG product (0.1 degree) as separate parameters, which this snapshot does not use."
+}
