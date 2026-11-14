@@ -1,0 +1,88 @@
+/* Academic Blue design tokens: single source of truth. Light is the default. */
+:root {
+  --color-bg: #f7f9fc;
+  --color-surface: #ffffff;
+  --color-elevated: #f1f5fb;
+  --color-text: #172842;
+  --color-text-2: #50617a;
+  --color-accent: #2056a3;
+  --color-border: #d6e0ed;
+  --color-on-accent: #ffffff;
+
+  --color-success: #1e7a4c;
+  --color-warning: #8a5a00;
+  --color-danger: #b3261e;
+  --color-success-soft: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+  --color-warning-soft: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --touch-min: 44px;
+  --sidebar-width: 240px;
+  --content-max: 1200px;
+
+  --shadow-1: 0 1px 2px rgb(23 40 66 / 6%);
+  --shadow-2: 0 8px 24px rgb(23 40 66 / 12%);
+  --shadow-3: 0 16px 48px rgb(23 40 66 / 18%);
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 0.9375rem;
+  --font-h1: 1.75rem;
+  --font-h2: 1.25rem;
+  --font-h3: 1rem;
+  --font-caption: 0.8125rem;
+
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #0c1423;
+  --color-surface: #152235;
+  --color-elevated: #1c2d43;
+  --color-text: #f2f6ff;
+  --color-text-2: #b3c2d8;
+  --color-accent: #91b9ff;
+  --color-border: #34455e;
+  --color-on-accent: #0c1423;
+  --color-success: #7bd3a4;
+  --color-warning: #f2c46b;
+  --color-danger: #ff9a92;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / 35%);
+  --shadow-3: 0 16px 48px rgb(0 0 0 / 45%);
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #0c1423;
+    --color-surface: #152235;
+    --color-elevated: #1c2d43;
+    --color-text: #f2f6ff;
+    --color-text-2: #b3c2d8;
+    --color-accent: #91b9ff;
+    --color-border: #34455e;
+    --color-on-accent: #0c1423;
+    --color-success: #7bd3a4;
+    --color-warning: #f2c46b;
+    --color-danger: #ff9a92;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-2: 0 8px 24px rgb(0 0 0 / 35%);
+    --shadow-3: 0 16px 48px rgb(0 0 0 / 45%);
+
+    color-scheme: dark;
+  }
+}

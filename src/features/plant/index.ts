@@ -1,0 +1,1 @@
+export { PlantCheckPage } from './PlantCheckPage'

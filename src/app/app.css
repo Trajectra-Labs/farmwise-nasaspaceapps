@@ -1,0 +1,131 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.shell__sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.shell__brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.shell__brand-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  color: inherit;
+  text-decoration: none;
+}
+
+.shell__nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.shell__link {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.shell__link:hover {
+  background: var(--color-elevated);
+}
+
+.shell__link[aria-current='page'] {
+  background: var(--color-elevated);
+  color: var(--color-accent);
+  font-weight: 700;
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+.shell__main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-5);
+}
+
+@media (min-width: 1025px) {
+  .shell__main {
+    padding: var(--space-6);
+  }
+}
+
+.shell__content {
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.shell__header {
+  display: none;
+}
+
+.shell__menu-button {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  .shell__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .shell__menu-button {
+    display: inline-flex;
+  }
+
+  .shell__sidebar {
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .shell__sidebar .shell__brand {
+    display: none;
+  }
+
+  .shell__sidebar[data-open='false'] .shell__nav,
+  .shell__sidebar[data-open='false'] .shell__theme {
+    display: none;
+  }
+
+  .shell__main {
+    padding: var(--space-4);
+  }
+}
+
+.fw-error {
+  max-width: 560px;
+  margin: var(--space-6) auto;
+  padding: var(--space-5);
+}
