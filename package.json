@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "e2e": "playwright test",
+    "e2e:ted": "playwright test tests/e2e/ted-",
     "data:nasa": "node scripts/fetch-nasa-power.mjs",
     "qa": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },
@@ -23,6 +24,7 @@
     "recharts": "^3.10.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.65.1",
     "@testing-library/jest-dom": "^7.0.1",

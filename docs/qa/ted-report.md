@@ -100,3 +100,70 @@ Other checks run: `pnpm typecheck` pass, `pnpm lint` 0 errors (4 warnings in fil
 - Field sensors card: static explainer in `src/features/evidence/FieldSensors.tsx`, no import from Abdullah's code. Comparison table (two columns on desktop, stacked under 768 px) for coverage, what it measures, update pattern and labelling. Links to `/farm` with the router `Link`. The wording about what a sensor measures ("such as soil moisture and soil temperature") is generic and is not checked against Abdullah's panel.
 - Link test now checks only external (https) links, so the internal `/farm` link and contents anchors do not trip it.
 - Not visually checked in a browser this round: sticky contents sidebar at 1024/1440, stacked comparison at 320/375, dark mode. Only jsdom tests and the build ran.
+
+## E2E and accessibility round (Playwright + axe, 15 Nov 2026)
+
+Run: `pnpm exec playwright test` against the production build (`pnpm build && pnpm preview --port 4173`), installed Google Chrome (`channel: 'chrome'`), 4 workers, on the MacBook (hp-1 was not used; Chrome is installed here). Result of the final run: 35 passed, 1 failed (the console-error check on `/evidence`; see Shared defects). The `/farm` console-error check passed in the final run and failed in the first two runs, so it is timing-dependent for the same cause. Specs: `tests/e2e/ted-evidence.spec.ts`, `tests/e2e/ted-farm-map.spec.ts`, helpers in `tests/e2e/helpers/ted-*.ts`. Run only these with `pnpm e2e:ted`.
+
+### Results
+
+| Check | /evidence | /farm |
+|---|---|---|
+| 2a axe wcag2a/2aa/21aa, light | Pass | Pass |
+| 2a axe wcag2a/2aa/21aa, dark | Pass | Pass |
+| 2b No console or page errors on load | Failed before the favicon fix (404); see final-round run | Same |
+| 2c No horizontal overflow, 320/375/768/1024/1440, light and dark (10 each) | Pass (10/10) | Pass (10/10) |
+| 2d X01 skip link is first Tab stop; all contents links reachable by Tab; "Climate history" activates and scrolls to the section; focus ring outline not none | Pass | n/a |
+| 2d X01 "Show data table" opens with Enter, `aria-expanded` true then false | Pass | n/a |
+| 2d X01 map fields and buttons focusable with visible outline; typing coordinates by keyboard works | n/a | Pass |
+| 2e E04 external links: https, 2+ word descriptive text, noopener on `_blank` | Pass | n/a |
+| 2f E09/F09 tile requests aborted: notice shown, manual entry works, lat 95 shows error and `aria-invalid` | n/a | Pass |
+| 2f Offline (`setOffline(true)` after load): 3+ charts render from the snapshot, data table opens | Pass | n/a |
+| 2g F08 map click sets coordinates, Clear empties, sample fills -0.3031 / 36.08 | n/a | Pass |
+| 2h X12 no "real-time" / "live data"; "forecast" only in negations | Pass | Pass |
+
+Offline test caveat: after `setOffline(true)` the test navigates client-side to My Farm and back (no reload, since a reload would need the network from the preview server). It shows the snapshot charts need no network at runtime; it does not prove a cold offline start (no service worker exists).
+
+### axe summary (serious/critical = 0 everywhere)
+
+| Route | Theme | Violations | Passes | Incomplete (needs manual review) |
+|---|---|---|---|---|
+| /evidence | light | 0 | 29 | 1 |
+| /evidence | dark | 0 | 29 | 1 |
+| /farm | light | 0 | 27 | 1 |
+| /farm | dark | 0 | 27 | 1 |
+
+Full JSON is attached to each test in the Playwright results (`test-results/` locally; not committed). The one "incomplete" item per run was not inspected this round, so contrast on elements axe could not resolve (for example text over the map) is not confirmed.
+
+### Shared defects found
+
+1. **Missing favicon, 404 on every page: fixed.** Added `public/favicon.svg` (plain field-rows mark in #2056A3) and `<link rel="icon" type="image/svg+xml" href="/favicon.svg">` in `index.html`. This was the one allowed shared edit in the final round.
+2. **Axe "incomplete" item:** inspected, see "Axe incomplete review" below.
+
+### Axe incomplete review (final round)
+
+Rule `color-contrast`, the same single rule on all four runs. Axe could not resolve a background, so it asked for manual review.
+
+| Route | Nodes | Axe reason | Measured (computed style vs opaque ancestor background) |
+|---|---|---|---|
+| /evidence (both themes) | 47 `tspan` axis ticks and axis titles, 4 short tick labels (`shortTextContent`) | "contains an image node" (SVG text) | Axis text #50617A on #FFFFFF = 6.3:1 light; #B3C2D8 on #152235 = 8.86:1 dark. Pass. No background image involved. |
+| /farm (both themes) | `.leaflet-control-attribution` and its two links (`imgNode`) | Sits over map tiles | Before: links #0078A8 on Leaflet's #DDD fallback = 3.64:1, below AA (worst case; real background is 80% white over tiles). Fixed, see below. |
+| /farm (both themes) | Field labels, help text, Clear button, Latitude and Longitude inputs (`bgOverlap`, `emptyValue`) | "overlapped by another element"; empty inputs | 14.8:1 light, 14.79:1 dark for labels and inputs; help text 6.3:1 / 8.86:1; button 7.19:1 / 8.07:1. `elementFromPoint` at each element's centre returned the element itself, so nothing covers them. These nodes no longer appear in the incomplete list after the attribution change. Inputs were measured at their text colour; empty-value contrast was not tested with a value typed. |
+
+Additional finding from the same probe: the chart legend text in the temperature chart took the series colour (Recharts default): Minimum 3.29:1 light and 3.94:1 dark, below AA. Axe did not flag it.
+
+Fixes (Ted's folders only):
+- `src/features/evidence/ClimateCharts.tsx`: the legend text now uses `var(--color-text-2)` (6.3:1 light, 8.86:1 dark). The line swatches keep the series colours.
+- `src/features/farm-map/farm-map.css`: the map attribution has an opaque `--color-surface` background, `--color-text` text and `--color-accent` links. Measured after: text 14.8:1 / 14.79:1, links 7.19:1 / 8.07:1 (light / dark).
+
+Remaining: axe still lists `.leaflet-control-attribution` as incomplete on `/farm` (both themes, no reason message). The probe shows an opaque background and AA contrast, so I treat it as resolved by measurement, but axe itself does not confirm it. The `/evidence` SVG items stay "incomplete" because axe cannot evaluate SVG text; measured values above. I measured computed styles, not pixels in a screenshot crop.
+
+### Screenshots (full page, `docs/qa/screenshots/ted/`, 20 files)
+
+`evidence-{320,375,768,1024,1440}-{light,dark}.png` and `farm-{320,375,768,1024,1440}-{light,dark}.png`. I looked only at `farm-320-dark.png` (no clipping, controls readable); the others are unreviewed by eye, but passed the overflow assertion and axe.
+
+### Gaps
+
+- Map tile loading with the real OSM server was exercised online by the click test; it depends on network access when run.
+- Contrast over map tiles (attribution measured by computed style only), 200% zoom and screen-reader announcements were not tested.
+- `tests/e2e` files are type-checked by `tsc -b` through the node tsconfig, which lacks DOM types, so each test file starts with `/// <reference lib="dom" />`. A shared tsconfig fix would remove that.

@@ -223,7 +223,10 @@ export function ClimateCharts({ climate, retrievedAt }: ClimateChartsProps) {
             <XAxis dataKey="key" ticks={januaries} tickFormatter={(k: string) => k.slice(0, 4)} tick={AXIS} stroke={GRID} />
             <YAxis tick={AXIS} stroke={GRID} width={56} unit="" label={{ value: 'Temperature (\u00b0C)', angle: -90, position: 'insideLeft', style: AXIS }} />
             <Tooltip content={makeTooltip('\u00b0C', 1, badgeLabel, labelFor)} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              wrapperStyle={{ fontSize: 12 }}
+              formatter={(value) => <span style={{ color: 'var(--color-text-2)' }}>{value}</span>}
+            />
             <Line type="monotone" dataKey="max" name="Maximum" stroke={S3} strokeWidth={1.75} dot={false} connectNulls={false} isAnimationActive={false} />
             <Line type="monotone" dataKey="t2m" name="Mean" stroke={S1} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />
             <Line type="monotone" dataKey="min" name="Minimum" stroke={S2} strokeWidth={1.75} dot={false} connectNulls={false} isAnimationActive={false} />

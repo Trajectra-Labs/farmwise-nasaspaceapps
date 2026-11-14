@@ -4,10 +4,12 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   reporter: 'list',
-  use: { baseURL: 'http://localhost:5173' },
+  use: { baseURL: 'http://localhost:4173', channel: 'chrome' },
+  // Production build, so dev hot-reload noise is excluded from console checks.
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    command: 'pnpm build && pnpm preview --port 4173 --strictPort',
+    url: 'http://localhost:4173',
+    reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
   },
 })

@@ -87,3 +87,13 @@
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
+
+/* Leaflet's attribution sits over map tiles; give it an opaque token background so its text
+   and links keep AA contrast in both themes. */
+.fm-map__canvas.leaflet-container .leaflet-control-attribution {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.fm-map__canvas.leaflet-container .leaflet-control-attribution a {
+  color: var(--color-accent);
+}

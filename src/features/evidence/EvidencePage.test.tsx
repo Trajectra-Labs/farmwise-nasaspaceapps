@@ -94,6 +94,10 @@ describe('source cards (E01, E03)', () => {
       expect(row.textContent).not.toMatch(/\bUsed\b/)
     })
     expect(screen.queryByRole('heading', { level: 3, name: 'SMAP' })).not.toBeInTheDocument()
+    // The section h2 is the only title; the card does not repeat it.
+    expect(screen.getAllByText('Other NASA datasets: not used', { selector: 'h1,h2,h3,h4' })).toHaveLength(1)
+    expect(within(section).queryAllByRole('heading', { level: 3 })).toHaveLength(0)
+    expect(within(section).getByText(/has not retrieved any of these/)).toBeInTheDocument()
   })
 })
 

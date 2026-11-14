@@ -11,7 +11,7 @@ const coordText = (lat: number, lon: number): string => `${lat}, ${lon}`
 
 export function UnusedSources() {
   return (
-    <Card title="Other NASA datasets: not used" headingLevel={3} className="ev-source ev-source--unused">
+    <Card className="ev-source ev-source--unused">
       <p className="ev-caption">
         FarmWise has not retrieved any of these, so no values from them appear anywhere in the app.
       </p>
