@@ -114,3 +114,8 @@ Follow `DEMO_SCRIPT.md` (30 seconds, six beats). Use a clean browser profile at 
 - [ ] Paste the overview from `SUBMISSION_NOTES.md` into the NASA form
 - [ ] List the NASA data used (POWER monthly, 2014 to 2023) and the simulation disclosures
 - [ ] Check voice input once manually in Chrome (optional feature)
+
+## Merge record
+
+- Last integration commit: `6f786aa7b52b799542c4e1e6ead116ade0133dc6` (CI passed: typecheck, lint, 280 unit tests, build, Playwright).
+- Pull request #1 merged into `ted/evidence` (default branch) with a merge commit, `26d6bca6bb8ce3f58c84f518e1e1198e2b281e06`. All branch histories (Ted, Abdullah, Moen) are preserved. The source branches were not deleted.
