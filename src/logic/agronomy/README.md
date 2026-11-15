@@ -10,7 +10,7 @@ Pure TypeScript, no I/O, no `Date.now` / `Math.random`: identical inputs always 
 | `model.ts` | Shared constants/helpers (rain shares, irrigation, ET, FAO-33 yield response). |
 | `evaluate.ts` | `evaluateRotations(farm, climate, soil, options?)` → 3 plans + recommendation. |
 | `scenario.ts` | `runScenario(plan, inputs, context)`, presets, limits, `matchPreset`, `clampScenarioInputs`. |
-| `format.ts` | Clipboard/JSON formatters, `cropName`, `formatKes`, `formatRange`, source labels. |
+| `format.ts` | The ONE shared formatter set (used by both UI features), clipboard/JSON formatters, provenance helpers, source labels. |
 | `index.ts` | Barrel. |
 
 ## 1. Crop manifest (Nakuru County, Kenya · lat −0.30, lon 36.07 · bimodal rains)
@@ -40,7 +40,10 @@ Sources and honesty:
   ranges, heat thresholds, drought-tolerance ratings, pest groups, season lists, "familiar" flags. Finger millet is
   long-rains only because of its long growing cycle. No crop is restricted by default; `restricted` is supported
   (blocking) and exercised in tests through a custom manifest (`evaluateRotations(..., { crops })`).
-- Crop id aliases (`bean`, `potato`, `millet`, `soy`, …) are normalised; anything else is an **unknown crop**.
+- Crop id aliases (`bean`, `potato`, `millet`, `soy`, …) are canonicalised at the start of `evaluateRotations`: every
+  plan (including `current`) carries canonical ids, and change counting / distinctness compare canonical ids, so
+  `bean` → `beans` is never a "change". Anything else is an **unknown crop**.
+- Pest-group ids are internal; farmer-facing text uses `PEST_GROUP_LABELS` / `pestGroupLabel(id)`.
 
 ## 2. Feasibility checks (run before ranking)
 
@@ -109,7 +112,10 @@ Evidence per plan: climate evidence passed through from `ClimateContext`; soil (
 `soil-p`, `soil-k`, source `SIMULATED_IOT` or `USER_SOIL_TEST`); farmer inputs (`farmer-rotation`, `farmer-irrigation`,
 `farmer-budget`, `farmer-area`, `farmer-priorities`, `FARMER_REPORTED`); model outputs (`model-water-balance`,
 `model-cost`, `model-score`, `MODEL_ESTIMATE`). Every `Reason` carries `evidenceIds` and/or `ruleIds`.
-Costs are KES rounded to the nearest 1,000; `costBasis:"per_ha"` when area is unknown or ≤ 0.
+Model costs are KES rounded to the nearest 1,000; `costBasis:"per_ha"` when area is unknown or ≤ 0. The farmer's
+budget is user-entered and is never rounded (evidence keeps the raw number with unit `KES`; text shows it as entered).
+Pre-formatted evidence values (e.g. `model-cost` = "KES 200,000 – 360,000") carry no `unit`.
+`RotationEvaluation.provenance` records the climate source/snapshot/period and soil source actually used.
 
 ## 6. Scenario formulae (`runScenario`)
 
@@ -131,7 +137,25 @@ Inputs are clamped/snapped to `SCENARIO_LIMITS` (rain −50…+30 % step 5; temp
   net = revenue low − cost high … revenue high − cost low; indices from high/low water need.
 - Null handling: no rainfall ⇒ water/yield/revenue/net = null (cost still shown); no area ⇒ per ha; empty rotation ⇒
   all null; unknown crops are skipped. Every case adds a plain-language `uncertainty` note; nothing returns NaN/Infinity.
-- Presets: Typical (0, 0, 100, 0), Drier (rain −30 %), Hotter (+2 °C), Higher costs (+25 %).
+- Presets: Typical (0, 0, 100, 0), Drier (rain −30 %), Hotter (+2 °C), Higher costs (+25 %). Preset descriptions do
+  not name a data source or period.
+- Provenance: `result.provenance` = `{ climate: { source, label, snapshot, period, spatialScale } | null, soil }`, read
+  from the `ClimateContext`'s own evidence, `snapshot` flag and `observedPeriod`. The climate uncertainty sentence and
+  the copy-summary "Labels:" line are built from it; with no climate nothing claims NASA data.
+
+## 6b. Shared formatters (`format.ts`, exported from `index.ts`)
+
+| Function | Example |
+|---|---|
+| `formatKes(n)` | `KES 120,000`; negative `−KES 20,000` (U+2212); null/NaN `Unknown` |
+| `formatKesRange(r)` | `KES 330,000 – 560,000` (currency once, en dash); equal ends `KES 5,000`; null `Unknown` |
+| `formatSignedKes(n)` | `+KES 1,000` / `−KES 1,000` / `KES 0` |
+| `formatNumber(n, maxFractionDigits = 0)` | `1,631`; `formatNumber(16.64, 1)` → `16.6`; negatives use U+2212 |
+| `formatMm(n)` | `1,631 mm` |
+| `formatRange(r, fmt = formatKes)` | compatibility: `KES 90,000 – KES 150,000` |
+| `cropName(id)` | `Common beans`; unknown → `Teff (unknown crop)` |
+
+All return `Unknown` for null/non-finite input and never print NaN/Infinity.
 
 ## 7. Known limitations
 
@@ -141,5 +165,3 @@ Inputs are clamped/snapped to `SCENARIO_LIMITS` (rain −50…+30 % step 5; temp
 - Soil moisture/N/pH from a simulated sensor are synthetic; a single reading is applied to every season.
 - No labour, market access, seed availability, storage, intercropping or fallow modelling; pest groups are coarse.
 - Budget is interpreted as input budget per season for the whole farm.
-- Test environment note: on Node ≥ 25 the experimental global `localStorage` is `undefined` and shadows jsdom's,
-  which breaks `tests/setup.ts`; `__tests__/storagePolyfill.ts` works around it for these tests only.

@@ -2,7 +2,7 @@
 import { useRef, useState, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge, Button, EmptyState, ErrorState, Skeleton, SourceBadge, useToast } from "@fw/ui";
-import { PLAN_ORDER, type PlanId } from "../../logic/agronomy/types";
+import type { PlanId } from "../../logic/agronomy/types";
 import { useMoenData } from "./moenStore";
 import { PlanCard } from "./PlanCard";
 import { PlanDetails } from "./PlanDetails";
@@ -10,7 +10,7 @@ import { WhyDrawer } from "./WhyDrawer";
 import { CompareDialog } from "./CompareDialog";
 import { copyText, downloadJson } from "./exportUtils";
 import { evaluationJson, summaryText } from "./logicBridge";
-import { kes } from "./format";
+import { formatKes, formatNumber } from "./format";
 import "./rotation.css";
 
 const IRRIGATION_TEXT = { rainfed: "Rainfed", limited: "Limited irrigation", regular: "Regular irrigation" } as const;
@@ -24,7 +24,8 @@ export function RotationPage() {
   const [compareOpen, setCompareOpen] = useState(false);
   const groupRef = useRef<HTMLDivElement>(null);
 
-  if (!farm) {
+  // useMoenData evaluates whenever a farm exists, so "no farm" is the only case without an evaluation.
+  if (!farm || !evaluation) {
     return (
       <div className="rot-page">
         <h1>Rotation Planner</h1>
@@ -37,19 +38,18 @@ export function RotationPage() {
     );
   }
 
-  const plans = evaluation?.plans ?? [];
+  const plans = evaluation.plans;
   const active = plans.find((p) => p.id === activePlanId) ?? plans[0] ?? null;
   const whyPlan = plans.find((p) => p.id === whyId) ?? null;
   const currentSeasons = plans.find((p) => p.id === "current")?.seasons ?? farm.rotation;
   const hasBudget = farm.budget != null;
-  const exportDisabled = !evaluation;
 
   const select = (id: PlanId) => setActivePlanId(id);
 
   const onGroupKey = (e: KeyboardEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
     if (target.getAttribute("role") !== "radio") return;
-    const ids = plans.length ? plans.map((p) => p.id) : [...PLAN_ORDER];
+    const ids = plans.map((p) => p.id);
     const i = ids.indexOf(target.dataset.radioId as PlanId);
     let next: PlanId | undefined;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") next = ids[(i + 1) % ids.length];
@@ -74,23 +74,18 @@ export function RotationPage() {
   };
 
   const useInScenarios = () => {
+    // The button is disabled for infeasible plans (see PlanDetails), so only feasible plans reach here.
     if (!active) return;
-    if (!active.feasible) {
-      toast.show({ tone: "danger", title: `“${active.title}” is not feasible, so it was not sent to scenarios.` });
-      return;
-    }
     select(active.id);
     toast.show({ tone: "success", title: `Using “${active.title}” in Scenario Studio.` });
     navigate("/scenarios");
   };
 
   const onCopy = async () => {
-    if (!evaluation) return;
     const ok = await copyText(summaryText(farm, evaluation));
     toast.show(ok ? { tone: "success", title: "Rotation summary copied to clipboard." } : { tone: "danger", title: "Could not copy. Your browser blocked clipboard access." });
   };
   const onDownload = () => {
-    if (!evaluation) return;
     const ok = downloadJson(`farmwise-rotations-${farm.id}.json`, evaluationJson(farm, evaluation));
     toast.show(ok ? { tone: "success", title: `Downloaded farmwise-rotations-${farm.id}.json` } : { tone: "danger", title: "Download failed in this browser." });
   };
@@ -103,17 +98,16 @@ export function RotationPage() {
         <div className="rot-header__text">
           <p className="rot-eyebrow">{farm.name}</p>
           <h1>Rotation Planner</h1>
-          <p className="fw-muted rot-lede">
+          <p className="rot-muted rot-lede">
             Three complete crop rotations for your farm: what you grow now, a minimum change and a more resilient option.
             Scores are relative model estimates from historical climate, soil readings and your inputs. They are not forecasts or guarantees.
           </p>
         </div>
         <div className="rot-header__actions" role="group" aria-label="Plan actions">
           <Button onClick={keepCurrent}>Keep my current rotation</Button>
-          <Button onClick={() => setCompareOpen(true)} disabled={!evaluation} aria-haspopup="dialog">Compare all</Button>
-          <Button onClick={onCopy} disabled={exportDisabled} aria-describedby={exportDisabled ? "rot-export-note" : undefined}>Copy summary</Button>
-          <Button onClick={onDownload} disabled={exportDisabled} aria-describedby={exportDisabled ? "rot-export-note" : undefined}>Download JSON</Button>
-          {exportDisabled ? <p id="rot-export-note" className="rot-small fw-muted">Export is available once plans have been evaluated.</p> : null}
+          <Button onClick={() => setCompareOpen(true)} aria-haspopup="dialog">Compare all</Button>
+          <Button onClick={onCopy}>Copy summary</Button>
+          <Button onClick={onDownload}>Download JSON</Button>
         </div>
       </header>
 
@@ -122,13 +116,13 @@ export function RotationPage() {
         <div className="rot-prov__items">
           <div className="rot-prov__item" data-testid="prov-climate">
             <span className="rot-label">Climate</span>
-            {climateStatus === "loading" ? (
+            {climateStatus === "loading" && !climate ? (
               <Skeleton width={180} height={20} label="Loading climate evidence" />
             ) : climate ? (
               <span className="rot-prov__val">
                 <SourceBadge source={climateSource} />
-                <span>{climate.annualRainfallMm != null ? `${Math.round(climate.annualRainfallMm)} mm/yr rain` : "Rain unknown"}
-                  {climate.meanTemperatureC != null ? ` · ${Math.round(climate.meanTemperatureC * 10) / 10} °C mean` : ""}
+                <span>{climate.annualRainfallMm != null ? `${formatNumber(climate.annualRainfallMm)} mm/yr rain` : "Rain unknown"}
+                  {climate.meanTemperatureC != null ? ` · ${formatNumber(climate.meanTemperatureC, 1)} °C mean` : ""}
                   {` · ${climate.observedPeriod}`}</span>
               </span>
             ) : <span className="rot-prov__val"><Badge tone="warn">Unavailable</Badge></span>}
@@ -153,7 +147,7 @@ export function RotationPage() {
               <span>
                 {IRRIGATION_TEXT[farm.irrigation]}
                 {` · ${farm.areaHa != null ? `${farm.areaHa} ha` : "area unknown"}`}
-                {` · ${farm.budget != null ? `budget ${kes(farm.budget)}` : "no budget given"}`}
+                {` · ${farm.budget != null ? `budget ${formatKes(farm.budget)}` : "no budget given"}`}
               </span>
             </span>
           </div>
@@ -173,19 +167,12 @@ export function RotationPage() {
       <section aria-labelledby="rot-plans-h" className="rot-plans">
         <div className="rot-row rot-plans__head">
           <h2 id="rot-plans-h">Your three plans</h2>
-          {evaluation ? (
-            <p className="fw-muted rot-small rot-plans__why">
-              {evaluation.recommendedId ? evaluation.recommendationReason : `No plan is recommended: ${evaluation.recommendationReason}`}
-            </p>
-          ) : null}
+          <p className="rot-muted rot-small rot-plans__why">
+            {evaluation.recommendedId ? evaluation.recommendationReason : `No plan is recommended: ${evaluation.recommendationReason}`}
+          </p>
         </div>
-        {!evaluation ? (
-          <div className="rot-grid" aria-busy="true">
-            {PLAN_ORDER.map((id) => <Skeleton key={id} height={320} label="Loading plan" />)}
-          </div>
-        ) : (
-          // eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex: the checked radio inside is focusable
-          <div ref={groupRef} className="rot-grid" role="radiogroup" aria-label="Choose a rotation plan" onKeyDown={onGroupKey}>
+        {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex: the checked radio inside is focusable */}
+        <div ref={groupRef} className="rot-grid" role="radiogroup" aria-label="Choose a rotation plan" onKeyDown={onGroupKey}>
             {plans.map((p) => (
               <PlanCard
                 key={p.id}
@@ -200,10 +187,9 @@ export function RotationPage() {
               />
             ))}
           </div>
-        )}
       </section>
 
-      {evaluation && active ? (
+      {active ? (
         <PlanDetails
           plan={active}
           evaluation={evaluation}
@@ -214,7 +200,7 @@ export function RotationPage() {
       ) : null}
 
       <WhyDrawer plan={whyPlan} open={whyId != null} onClose={() => setWhyId(null)} />
-      {evaluation ? <CompareDialog open={compareOpen} onClose={() => setCompareOpen(false)} evaluation={evaluation} /> : null}
+      <CompareDialog open={compareOpen} onClose={() => setCompareOpen(false)} evaluation={evaluation} />
     </div>
   );
 }

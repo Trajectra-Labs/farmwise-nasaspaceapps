@@ -3,6 +3,8 @@
 .rot-page h1 { margin: 0; }
 .rot-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fw-s2); }
 .rot-small { font-size: 13px; }
+.rot-muted { color: var(--fw-text-2); }
+.rot-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .rot-label { font-size: 12.5px; font-weight: 650; color: var(--fw-text-2); text-transform: uppercase; letter-spacing: .04em; }
 .rot-eyebrow { margin: 0 0 var(--fw-s1); font-weight: 600; color: var(--fw-blue); overflow-wrap: anywhere; }
 .rot-lede { max-width: 72ch; margin: var(--fw-s2) 0 0; }
@@ -17,7 +19,7 @@
 .rot-header__actions { display: flex; flex-wrap: wrap; gap: var(--fw-s2); align-items: center; }
 .rot-header__actions p { margin: 0; flex-basis: 100%; }
 @media (max-width: 479px) {
-  .rot-header__actions .fw-btn { flex: 1 1 100%; white-space: normal; }
+  .rot-header__actions > button { flex: 1 1 100%; white-space: normal; }
 }
 
 /* Provenance strip */
@@ -28,7 +30,7 @@
 .rot-prov__item { display: grid; gap: var(--fw-s1); min-width: 0; }
 .rot-prov__val { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fw-s2); font-size: 14px; overflow-wrap: anywhere; min-width: 0; }
 
-.rot-climate-error .fw-state { padding: var(--fw-s4); }
+.rot-climate-error > [role="alert"] { padding: var(--fw-s4); }
 
 /* Plans grid */
 .rot-plans { display: grid; gap: var(--fw-s3); min-width: 0; }
@@ -42,7 +44,7 @@
 .rot-card__title { margin: 0; font-size: 18px; }
 .rot-card__summary { margin: 0; font-size: 14px; }
 .rot-badges { display: flex; flex-wrap: wrap; gap: var(--fw-s1); }
-.rot-badges .fw-badge, .rot-prov__val .fw-badge { white-space: normal; }
+.rot-badges > span, .rot-prov__val > span { white-space: normal; }
 
 .rot-seq { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--fw-s1); grid-template-columns: repeat(auto-fill, minmax(min(132px, 100%), 1fr)); }
 .rot-seq__item { display: grid; padding: var(--fw-s2) var(--fw-s3); border-radius: var(--fw-radius-control); background: var(--fw-elevated);
@@ -61,10 +63,10 @@
 .rot-facts > div { display: grid; gap: 2px; min-width: 0; }
 .rot-facts dt { font-size: 12.5px; font-weight: 650; color: var(--fw-text-2); }
 .rot-facts dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
-.rot-facts dd .fw-badge { vertical-align: middle; white-space: normal; }
+.rot-facts dd > span { vertical-align: middle; white-space: normal; }
 
 .rot-card__actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: var(--fw-s2); padding-top: var(--fw-s2); }
-.rot-card__actions .fw-btn { flex: 1 1 auto; white-space: normal; }
+.rot-card__actions > button { flex: 1 1 auto; white-space: normal; }
 
 /* Details */
 .rot-details { display: grid; gap: var(--fw-s4); }
@@ -72,7 +74,7 @@
 .rot-details__head > div:first-child { min-width: 0; flex: 1 1 280px; }
 .rot-details__title { margin: 0 0 var(--fw-s2); overflow-wrap: anywhere; }
 .rot-details__actions { display: flex; flex-wrap: wrap; gap: var(--fw-s2); }
-@media (max-width: 479px) { .rot-details__actions, .rot-details__actions .fw-btn { flex: 1 1 100%; } }
+@media (max-width: 479px) { .rot-details__actions, .rot-details__actions > button { flex: 1 1 100%; } }
 .rot-details__grid { display: grid; gap: var(--fw-s5); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 768px) { .rot-details__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .rot-details h3 { margin-top: var(--fw-s3); }
@@ -80,7 +82,7 @@
 .rot-list { margin: 0 0 var(--fw-s2); padding-left: var(--fw-s5); display: grid; gap: var(--fw-s1); }
 .rot-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--fw-s2); }
 .rot-check { display: flex; gap: var(--fw-s2); align-items: flex-start; font-size: 14px; }
-.rot-check .fw-badge { flex: none; }
+.rot-check > span:first-child { flex: none; }
 .rot-check > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 .rot-breakdown { display: grid; gap: var(--fw-s2); }
 
@@ -91,7 +93,7 @@
 .rot-table tbody tr:last-child th, .rot-table tbody tr:last-child td { border-bottom: 0; }
 .rot-table thead th { background: var(--fw-elevated); font-size: 13px; color: var(--fw-text-2); }
 .rot-table tbody th { font-weight: 620; }
-.rot-table td .fw-badge { vertical-align: middle; }
+.rot-table td > span { vertical-align: middle; }
 .rot-compare-table { min-width: 720px; table-layout: fixed; }
 .rot-compare-table tbody th { width: 180px; }
 .rot-compare-table .rot-seq { grid-template-columns: minmax(0, 1fr); }

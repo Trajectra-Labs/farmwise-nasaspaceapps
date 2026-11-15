@@ -156,3 +156,15 @@ export function getCrop(id: string, crops: readonly CropRule[] = CROPS): CropRul
 export function isKnownSeason(season: string, crops: readonly CropRule[] = CROPS): boolean {
   return crops.some((c) => c.seasons.includes(season));
 }
+
+/** Farmer-facing names for internal pest/disease group ids (never show the raw id). */
+export const PEST_GROUP_LABELS: Readonly<Record<string, string>> = {
+  cereal_stemborer: "cereal stem borers and related cereal diseases (maize, sorghum)",
+  grain_legume: "bean fly, aphids and legume root rots (beans, soybean, cowpea)",
+  small_millet: "millet blast and millet pests",
+  solanaceae: "bacterial wilt and late blight (potato family)",
+  sweetpotato_weevil: "sweet potato weevil and virus",
+};
+export function pestGroupLabel(id: string): string {
+  return PEST_GROUP_LABELS[id] ?? (id ? id.replace(/[_-]+/g, " ") : "unknown pest group");
+}

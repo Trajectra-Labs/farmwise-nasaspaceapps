@@ -2,19 +2,20 @@ import type { ReactNode } from "react";
 import { Badge, Button, Dialog, SourceBadge } from "@fw/ui";
 import type { EvaluatedPlan, RotationEvaluation } from "../../logic/agronomy/types";
 import { PlanSequence } from "./PlanSequence";
-import { budgetFitText, changeText, confidenceText, kesRange, scoreText, soilImplication, waterText } from "./format";
+import { budgetFitText, changeText, confidenceText, formatKesRange, scoreText, soilImplication, waterText } from "./format";
 
 type Row = { key: string; label: string; render: (p: EvaluatedPlan) => ReactNode };
 
 export function CompareDialog({ open, onClose, evaluation }: { open: boolean; onClose: () => void; evaluation: RotationEvaluation }) {
+  const current = evaluation.plans.find((p) => p.id === "current")?.seasons;
   const rows: Row[] = [
-    { key: "seq", label: "Crop sequence", render: (p) => <PlanSequence seasons={p.seasons} label={`${p.title} sequence`} /> },
+    { key: "seq", label: "Crop sequence", render: (p) => <PlanSequence seasons={p.seasons} label={`${p.title} sequence`} changedFrom={p.id === "current" ? undefined : current} /> },
     { key: "feasible", label: "Feasible", render: (p) => (p.feasible ? <Badge tone="success">Yes</Badge> : <Badge tone="danger">No</Badge>) },
     { key: "change", label: "Change size", render: (p) => changeText(p.changeSize, p.changedSeasons, p.seasons.length) },
-    { key: "water", label: "Water need (per ha, rotation)", render: (p) => <>{waterText(p.waterDemandMm)} <SourceBadge source="MODEL_ESTIMATE" /></> },
+    { key: "water", label: "Water need (rotation total)", render: (p) => <>{waterText(p.waterDemandMm)} <SourceBadge source="MODEL_ESTIMATE" /></> },
     { key: "soil", label: "Soil effect", render: (p) => soilImplication(p) },
-    { key: "cost", label: `Input cost range (${evaluation.currency})`, render: (p) => <>{kesRange(p.costRangeKes)} {p.costBasis === "per_ha" ? "per ha" : "whole farm"} <SourceBadge source="MODEL_ESTIMATE" /></> },
-    { key: "budget", label: "Budget fit", render: (p) => budgetFitText[p.budgetFit] },
+    { key: "cost", label: `Input cost range (${evaluation.currency})`, render: (p) => <>{formatKesRange(p.costRangeKes)} {p.costBasis === "per_ha" ? "per ha" : "whole farm"} <SourceBadge source="MODEL_ESTIMATE" /></> },
+    { key: "budget", label: "Budget fit (per season)", render: (p) => <>{budgetFitText[p.budgetFit]}{p.budgetFit !== "unknown" ? <> <SourceBadge source="MODEL_ESTIMATE" /></> : null}</> },
     { key: "risks", label: "Risks flagged", render: (p) => String(p.risks.length) },
     { key: "score", label: "Score", render: (p) => <>{scoreText(p)} <SourceBadge source="MODEL_ESTIMATE" /></> },
     { key: "confidence", label: "Confidence", render: (p) => confidenceText(p.confidence) },
@@ -33,7 +34,7 @@ export function CompareDialog({ open, onClose, evaluation }: { open: boolean; on
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard-scrollable (WCAG 2.1.1) */}
         <div className="rot-table-scroll" role="region" aria-label="Plan comparison table" tabIndex={0}>
           <table className="rot-table rot-compare-table">
-            <caption className="fw-sr-only">Comparison of the three rotation plans</caption>
+            <caption className="rot-sr-only">Comparison of the three rotation plans</caption>
             <thead>
               <tr>
                 <th scope="col">Attribute</th>

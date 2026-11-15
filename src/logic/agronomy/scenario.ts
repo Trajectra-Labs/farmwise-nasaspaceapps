@@ -2,6 +2,7 @@
 // scenario inputs. Every number is an ESTIMATE from documented assumptions (README.md), not a guarantee.
 import type { CropSeason, MetricSet, RotationPlan, ScenarioInputs } from "@fw/contracts";
 import { getCrop } from "./crops";
+import { dataProvenance, describeClimateSource } from "./format";
 import {
   clamp, effectiveArea, ET_INCREASE_PER_DEG_C, finite, HEAT_YIELD_PENALTY_PER_DEG_C, heatYieldFactor, IRRIGATION_MM_PER_SEASON,
   mid, roundKes, SEASON_RAIN_SHARE, seasonShare, seasonSupplyMm, waterNeedMm, waterYieldRatio,
@@ -19,7 +20,7 @@ export const SCENARIO_LIMITS: Readonly<Record<keyof ScenarioInputs, SliderLimit>
 };
 
 export const SCENARIO_PRESETS: readonly ScenarioPreset[] = [
-  { id: "typical", label: "Typical", description: "Historical average conditions from the NASA POWER 2015–2024 snapshot; today's input costs.", inputs: { ...DEFAULT_SCENARIO_INPUTS } },
+  { id: "typical", label: "Typical", description: "Historical average conditions from the farm's climate context (no change to rain or temperature); today's input costs.", inputs: { ...DEFAULT_SCENARIO_INPUTS } },
   { id: "drier", label: "Drier", description: "30 % less seasonal rainfall than the historical average.", inputs: { ...DEFAULT_SCENARIO_INPUTS, rainfallDeltaPct: -30 } },
   { id: "hotter", label: "Hotter", description: "Mean temperature 2 °C above the historical average (higher crop water demand, more heat stress).", inputs: { ...DEFAULT_SCENARIO_INPUTS, temperatureDeltaC: 2 } },
   { id: "costlier", label: "Higher costs", description: "Seed, fertiliser and labour costs 25 % higher.", inputs: { ...DEFAULT_SCENARIO_INPUTS, inputCostDeltaPct: 25 } },
@@ -119,7 +120,7 @@ function estimate(seasons: CropSeason[], inputs: ScenarioInputs, ctx: ScenarioCo
 
 // ───────────────────────────── public API ─────────────────────────────
 export const SCENARIO_ASSUMPTIONS: readonly string[] = [
-  `Seasonal rainfall = NASA mean annual rainfall × season share (Long rains ${SEASON_RAIN_SHARE["Long rains"]}, Short rains ${SEASON_RAIN_SHARE["Short rains"]}, unknown seasons 0.3) × (1 + rainfall change %).`,
+  `Seasonal rainfall = mean annual rainfall from the climate context × season share (Long rains ${SEASON_RAIN_SHARE["Long rains"]}, Short rains ${SEASON_RAIN_SHARE["Short rains"]}, unknown seasons 0.3) × (1 + rainfall change %).`,
   `Crop water need = mid FAO seasonal range × (1 + ${ET_INCREASE_PER_DEG_C * 100} % per °C of warming).`,
   `Irrigation per season at 100 % availability: rainfed ${IRRIGATION_MM_PER_SEASON.rainfed} mm, limited ${IRRIGATION_MM_PER_SEASON.limited} mm, regular ${IRRIGATION_MM_PER_SEASON.regular} mm (assumption), scaled by the irrigation slider.`,
   "Soil moisture reading adjusts available water by (moisture % − 25) × 3 mm, capped at ±60 mm (assumption; simulated sensor values are not a soil test).",
@@ -137,13 +138,15 @@ export function runScenario(plan: RotationPlan, inputs: ScenarioInputs, context:
   const area = effectiveArea(context.farm);
   const uncertainty: string[] = [
     "Every figure here is a model estimate, not a guarantee of yield or income: real outcomes depend on weather timing, pests, management and markets.",
-    "Rainfall comes from a historical NASA POWER offline snapshot (regional grid, not your field) — it is not a forecast.",
   ];
+  const provenance = dataProvenance(context?.climate ?? null, context?.soil ?? null);
+  uncertainty.push(describeClimateSource(provenance.climate));
   if (!context.climate || !finite(context.climate.annualRainfallMm)) uncertainty.push("Climate data unavailable: water and yield indices and revenue cannot be estimated (shown as unknown, not zero).");
   if (!finite(context.climate?.meanTemperatureC)) uncertainty.push("Mean temperature unknown: heat-stress effects are not included.");
   if (area == null) uncertainty.push("Farm area unknown or zero: money values are per hectare.");
   if (!context.soil) uncertainty.push("No soil reading: soil moisture was not included in the water balance.");
   else if (context.soil.source === "SIMULATED_IOT") uncertainty.push("Soil moisture comes from a simulated sensor, not a real field reading.");
+  else if (context.soil.source === "USER_SOIL_TEST") uncertainty.push("Soil moisture comes from the farmer's own soil test entry.");
   if (!(plan?.seasons?.length)) uncertainty.push("The selected plan has no seasons, so no estimate can be made.");
   if (!(context?.currentPlan?.seasons?.length)) uncertainty.push("The current rotation has no seasons, so there is no baseline.");
   const unknown = [...new Set([...sel.unknownCrops, ...base.unknownCrops])];
@@ -159,6 +162,7 @@ export function runScenario(plan: RotationPlan, inputs: ScenarioInputs, context:
     waterDemandMm: { baseline: base.demandMm, selected: sel.demandMm },
     waterSupplyMm: sel.supplyMm,
     costBasis: area == null ? "per_ha" : "farm",
+    provenance,
     uncertainty, assumptions: [...SCENARIO_ASSUMPTIONS],
   };
 }

@@ -47,7 +47,7 @@
 .fw-select { min-height: 44px; border-radius: var(--fw-radius-control); border: 1px solid var(--fw-border-strong); background: var(--fw-surface);
   color: var(--fw-text); padding: 0 var(--fw-s3); font: inherit; max-width: 100%; }
 
-.fw-backdrop { position: fixed; inset: 0; background: rgba(12, 20, 35, .45); z-index: var(--fw-z-overlay); display: grid; place-items: center; padding: var(--fw-s4); }
+.fw-backdrop { position: fixed; inset: 0; background: var(--fw-backdrop); z-index: var(--fw-z-overlay); display: grid; place-items: center; padding: var(--fw-s4); }
 .fw-backdrop--drawer { place-items: stretch end; padding: 0; }
 .fw-dialog, .fw-drawer { background: var(--fw-surface); color: var(--fw-text); border: 1px solid var(--fw-border); box-shadow: var(--fw-shadow-overlay);
   display: flex; flex-direction: column; max-height: calc(100vh - 32px); min-width: 0; }

@@ -3,7 +3,7 @@ import type { CropSeason } from "@fw/contracts";
 import type { EvaluatedPlan } from "../../logic/agronomy/types";
 import { PlanSequence } from "./PlanSequence";
 import {
-  budgetFitText, changeText, confidenceText, kesRange, scoreText, soilImplication, topRisk, waterText,
+  budgetFitText, changeText, confidenceText, formatKesRange, scoreText, soilImplication, topRisk, waterText,
 } from "./format";
 
 export type PlanCardProps = {
@@ -29,7 +29,7 @@ export function PlanCard({ plan, selected, recommended, tabbable, currentSeasons
           {selected ? <Badge tone="neutral">Selected</Badge> : null}
         </div>
       </div>
-      <p className="rot-card__summary fw-muted">{plan.summary}</p>
+      <p className="rot-card__summary rot-muted">{plan.summary}</p>
 
       <PlanSequence seasons={plan.seasons} label={`${plan.title} crop sequence`} changedFrom={plan.id === "current" ? undefined : currentSeasons} />
 
@@ -49,18 +49,18 @@ export function PlanCard({ plan, selected, recommended, tabbable, currentSeasons
         <div><dt>Change</dt><dd>{changeText(plan.changeSize, plan.changedSeasons, plan.seasons.length)}</dd></div>
         <div>
           <dt>Water need</dt>
-          <dd data-testid={`water-${plan.id}`}>{waterText(plan.waterDemandMm)} per ha over the rotation <SourceBadge source="MODEL_ESTIMATE" /></dd>
+          <dd data-testid={`water-${plan.id}`}>{waterText(plan.waterDemandMm)} over the rotation <SourceBadge source="MODEL_ESTIMATE" /></dd>
         </div>
         <div><dt>Soil</dt><dd>{soilImplication(plan)}</dd></div>
         <div>
           <dt>Input costs</dt>
-          <dd>{kesRange(plan.costRangeKes)} {plan.costBasis === "per_ha" ? "per ha" : "whole farm"} <SourceBadge source="MODEL_ESTIMATE" /></dd>
+          <dd>{formatKesRange(plan.costRangeKes)} {plan.costBasis === "per_ha" ? "per ha" : "whole farm"} <SourceBadge source="MODEL_ESTIMATE" /></dd>
         </div>
         <div>
           <dt>Budget fit</dt>
           <dd>
             <span className={plan.budgetFit === "over" ? "rot-text-warn" : undefined}>{budgetFitText[plan.budgetFit]}</span>
-            {hasBudget ? <> <SourceBadge source="FARMER_REPORTED" /></> : null}
+            {hasBudget ? <> <SourceBadge source="MODEL_ESTIMATE" /></> : null}
           </dd>
         </div>
         <div><dt>Evidence</dt><dd>{plan.evidence.length} {plan.evidence.length === 1 ? "item" : "items"} linked</dd></div>
@@ -78,7 +78,7 @@ export function PlanCard({ plan, selected, recommended, tabbable, currentSeasons
           variant={selected ? "primary" : "secondary"}
           role="radio"
           aria-checked={selected}
-          aria-label={`${selected ? "Selected" : "Select"}: ${plan.title}`}
+          aria-labelledby={titleId}
           tabIndex={tabbable ? 0 : -1}
           onClick={onSelect}
           data-radio-id={plan.id}

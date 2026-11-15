@@ -1,4 +1,3 @@
-import "./storagePolyfill";
 import { describe, expect, it } from "vitest";
 import type { FarmProfile, ScenarioInputs, SoilInput } from "@fw/contracts";
 import {
@@ -140,6 +139,16 @@ describe("S11 · no NaN/Infinity at extremes", () => {
     expect(r.selected.estimatedNetReturn).toBeNull();
     expect(r.selected.estimatedCost).toBeGreaterThan(0);
     expect(r.uncertainty.join(" ")).toMatch(/Climate data unavailable/);
+  });
+  it("null climate: no NASA/period claim in uncertainty, assumptions or presets (REV-2)", () => {
+    const c = ctx(SAMPLE_FARM, null, null);
+    const r = runScenario(c.currentPlan, DEFAULT_SCENARIO_INPUTS, c);
+    expect([...r.uncertainty, ...r.assumptions].join(" ")).not.toMatch(/NASA|2015/);
+    expect(r.provenance).toEqual({ climate: null, soil: null });
+    expect(SCENARIO_PRESETS.map((p) => p.description).join(" ")).not.toMatch(/NASA|2015|2024/);
+    const withClimate = run({});
+    expect(withClimate.uncertainty.join(" ")).toContain("NASA offline snapshot");
+    expect(withClimate.uncertainty.join(" ")).toContain(CLIMATE.observedPeriod);
   });
   it("zero / unknown area → per-ha basis; empty rotation → all null", () => {
     const z = ctx(farmWith({ areaHa: 0 }));

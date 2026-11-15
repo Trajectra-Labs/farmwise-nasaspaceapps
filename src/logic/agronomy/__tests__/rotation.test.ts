@@ -1,4 +1,3 @@
-import "./storagePolyfill";
 import { describe, expect, it } from "vitest";
 import type { FarmProfile } from "@fw/contracts";
 import { CROPS, computeWeights, evaluateRotations, getCrop, PLAN_ORDER } from "..";
@@ -58,8 +57,8 @@ describe("R01/R11 · three complete, distinct, in-season sequences", () => {
     const m = e.plans[1];
     expect(m.changedSeasons).toBeGreaterThanOrEqual(1);
     expect(m.changedSeasons).toBeLessThanOrEqual(2);
-    expect(m.risks.some((r) => r.includes("pest group"))).toBe(false);
-    expect(e.plans[0].risks.some((r) => r.includes("pest group"))).toBe(true);
+    expect(m.risks.some((r) => r.includes("share pests and diseases"))).toBe(false);
+    expect(e.plans[0].risks.some((r) => r.includes("share pests and diseases"))).toBe(true);
     // familiar crop preferred (beans), not an unfamiliar legume
     expect(m.seasons.map((s) => s.cropId)).toEqual(["maize", "beans", "maize", "beans"]);
   });
@@ -98,6 +97,45 @@ describe("R01/R11 · three complete, distinct, in-season sequences", () => {
     expect(e.plans.map((p) => p.id)).toEqual([...PLAN_ORDER]);
     for (const p of e.plans) { expect(p.feasible).toBe(false); expect(p.score).toBeNull(); expect(p.constraints.join(" ")).toMatch(/empty/i); }
     expect(e.recommendedId).toBeNull();
+  });
+});
+
+describe("REV-1 · crop-id aliases are canonicalised", () => {
+  it('"bean" alias: current carries canonical ids, minimum is a real change', () => {
+    const farm = farmWith({ rotation: rot("maize", "bean", "maize", "bean") });
+    const canonical = evaluateRotations(farmWith({ rotation: rot("maize", "beans", "maize", "beans") }), CLIMATE, SOIL.normal);
+    const e = evaluateRotations(farm, CLIMATE, SOIL.normal);
+    expect(e.plans[0].seasons.map((s) => s.cropId)).toEqual(["maize", "beans", "maize", "beans"]);
+    expect(e.plans[0].score).toBe(canonical.plans[0].score);
+    expect(e.plans.map(key)).toEqual(canonical.plans.map(key));
+    expect(new Set(e.plans.map(key)).size).toBe(3);
+    for (const p of e.plans.slice(1)) expect(p.changedSeasons).toBe(p.seasons.filter((s, i) => s.cropId !== e.plans[0].seasons[i].cropId).length);
+  });
+  it('"potato" alias maps to irish_potato and is never counted as a change', () => {
+    const farm = farmWith({ rotation: rot("potato", "maize"), budget: 1_000_000 });
+    const e = evaluateRotations(farm, CLIMATE, SOIL.normal);
+    expect(e.plans[0].seasons[0].cropId).toBe("irish_potato");
+    expect(e.plans[0].missingInfo.join(" ")).not.toMatch(/potato/);
+    for (const p of e.plans.slice(1)) { expect(p.changedSeasons).toBeGreaterThanOrEqual(1); expect(key(p)).not.toBe("irish_potato>maize"); }
+  });
+});
+
+describe("REV-3/7/15 · evidence and text hygiene", () => {
+  it("pre-formatted model-cost evidence has no unit; budget evidence keeps the raw number", () => {
+    const p = evaluateRotations(farmWith({ budget: 123456.78 }), CLIMATE, SOIL.normal).plans[0];
+    const cost = p.evidence.find((x) => x.id === "model-cost")!;
+    expect(typeof cost.value).toBe("string");
+    expect(cost.unit).toBeUndefined();
+    const budget = p.evidence.find((x) => x.id === "farmer-budget")!;
+    expect(budget.value).toBe(123456.78);
+    expect(budget.unit).toBe("KES");
+    expect(p.checks.find((c) => c.id === "budget")!.detail).toContain("KES 123,456.78");
+  });
+  it("pest-group ids are never shown raw", () => {
+    const p = evaluateRotations(SAMPLE_FARM, CLIMATE, SOIL.normal).plans[0];
+    const text = [...p.risks, ...p.reasons.map((r) => r.text)].join(" ");
+    expect(text).toMatch(/stem borers/);
+    expect(text).not.toMatch(/cereal_stemborer|grain_legume/);
   });
 });
 

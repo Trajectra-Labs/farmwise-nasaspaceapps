@@ -1,7 +1,7 @@
 // Moen · public types for the deterministic agronomy model. Narrow typed EXTENSIONS of the frozen
 // contracts (PRD §4 allows feature-local extensions; src/contracts is never edited).
 import type {
-  ClimateContext, CropSeason, Evidence, FarmProfile, MetricSet, RotationPlan, ScenarioInputs, ScenarioResult, SoilInput,
+  ClimateContext, CropSeason, Evidence, FarmProfile, MetricSet, RotationPlan, ScenarioInputs, ScenarioResult, SoilInput, SourceKind,
 } from "@fw/contracts";
 
 export type PlanId = RotationPlan["id"];
@@ -76,6 +76,8 @@ export type RotationEvaluation = {
   recommendationReason: string;
   weights: Record<ScoreKey, number>;
   currency: "KES";
+  /** (Added) What data was actually used (climate source/snapshot/period, soil source). */
+  provenance?: DataProvenance;
 };
 
 export type ScenarioPresetId = "typical" | "drier" | "hotter" | "costlier";
@@ -99,7 +101,13 @@ export type DetailedScenarioResult = ScenarioResult & {
   /** Water available from rainfall + irrigation under the scenario, mm/ha over the rotation. */
   waterSupplyMm: number | null;
   costBasis: "farm" | "per_ha";
+  /** (Added) What data was actually used, so summaries never claim a source that was absent. */
+  provenance?: DataProvenance;
 };
+
+/** (Added) Provenance of the climate context actually used (null = no climate data). */
+export type ClimateProvenance = { source: SourceKind | null; label: string; snapshot: boolean; period: string; spatialScale: string | null };
+export type DataProvenance = { climate: ClimateProvenance | null; soil: SourceKind | null };
 
 /** (Added) Optional overrides for evaluateRotations — used by tests (e.g. a custom crop manifest). */
 export type EvaluateOptions = { crops?: CropRule[] };

@@ -1,7 +1,8 @@
 // Moen · evaluateRotations(): pure, deterministic rotation generation + feasibility + scoring.
 // No Date.now / Math.random / I/O. See README.md for every rule and assumption.
 import type { ClimateContext, CropSeason, Evidence, FarmProfile, SoilInput } from "@fw/contracts";
-import { CROPS, getCrop, isKnownSeason } from "./crops";
+import { CROPS, getCrop, isKnownSeason, normaliseCropId, pestGroupLabel } from "./crops";
+import { dataProvenance, formatKes, formatKesRange, formatNumber } from "./format";
 import {
   clamp, effectiveArea, effectiveBudget, finite, mid, roundKes, seasonRainMm, seasonSupplyMm, soilMoistureAdjMm,
   waterNeedMm, irrigationMm, WATER_RELIABILITY_BUFFER,
@@ -65,11 +66,14 @@ function slotBlockers(ctx: Ctx, slot: CropSeason): string[] {
       out.push(`${crop.name} (${slotLabel(slot)}) is rainfed and drought-sensitive, but expected rain ≈${Math.round(rain)} mm is well below its ≈${Math.round(need)} mm need`);
   }
   if (ctx.budget != null && ctx.area != null && crop.costKesPerHa.low * ctx.area > ctx.budget)
-    out.push(`${crop.name} needs at least ${kes(crop.costKesPerHa.low * ctx.area)} of inputs per season, above the ${kes(ctx.budget)} budget`);
+    out.push(`${crop.name} needs at least ${kes(crop.costKesPerHa.low * ctx.area)} of inputs per season, above the ${budgetKes(ctx.budget)} budget`);
   return out;
 }
 
-const kes = (n: number) => `KES ${Math.round(roundKes(n)).toLocaleString("en-US")}`;
+/** Model estimates: rounded to KES 1,000 (no false precision). */
+const kes = (n: number) => formatKes(roundKes(n));
+/** Farmer-entered budget: shown exactly as entered (never rounded). */
+const budgetKes = (n: number) => `KES ${formatNumber(n, 2)}`;
 export const slotLabel = (s: CropSeason) => `${s.season || "Unnamed season"} · year ${(s.yearOffset ?? 0) + 1}`;
 
 /** Indices i where slot i and the next slot (cyclic, the rotation repeats) share a pest group. */
@@ -112,7 +116,7 @@ const ISSUE_NAMES = ["a blocking constraint", "a water shortfall for a drought-s
 type Comp = { value: number | null; explanation: string };
 
 function waterComponent(ctx: Ctx, seq: CropSeason[]): Comp {
-  if (!ctx.hasRain) return { value: null, explanation: "Not scored: rainfall data (NASA climate context) is unavailable." };
+  if (!ctx.hasRain) return { value: null, explanation: "Not scored: rainfall data (climate context) is unavailable." };
   const vals: number[] = [];
   for (const s of seq) {
     const c = lookup(ctx, s.cropId);
@@ -170,14 +174,14 @@ function costComponent(ctx: Ctx, seq: CropSeason[]): Comp {
   if (ctx.budget != null && ctx.area != null) {
     const peak = Math.max(...costs.map((c) => c.mid));
     const pressure = ctx.budget > 0 ? peak / ctx.budget : 10;
-    return { value: Math.round(clamp(100 * (1.5 - pressure), 0, 100)), explanation: `100 × (1.5 − peak season cost ÷ budget); peak season ≈ ${kes(peak)} vs budget ${kes(ctx.budget)}.` };
+    return { value: Math.round(clamp(100 * (1.5 - pressure), 0, 100)), explanation: `100 × (1.5 − peak season cost ÷ budget); peak season ≈ ${kes(peak)} vs budget ${budgetKes(ctx.budget)}.` };
   }
   const avgPerHa = costs.reduce((a, c) => a + c.mid, 0) / costs.length / (ctx.area ?? 1);
   return { value: Math.round(clamp(100 * (1 - avgPerHa / 200000), 0, 100)), explanation: `Budget or area unknown, so scored on average input cost per hectare per season (≈${kes(avgPerHa)}) against a 200,000 KES/ha reference.` };
 }
 
 function climateComponent(ctx: Ctx, seq: CropSeason[]): Comp {
-  if (!finite(ctx.meanT)) return { value: null, explanation: "Not scored: temperature data (NASA climate context) is unavailable." };
+  if (!finite(ctx.meanT)) return { value: null, explanation: "Not scored: temperature data (climate context) is unavailable." };
   const vals = seq.map((s) => lookup(ctx, s.cropId)).filter((c): c is CropRule => !!c)
     .map((c) => ((c.droughtTolerance - 1) / 4) * 50 + clamp((c.heatStressAboveC - (ctx.meanT as number)) / 8, 0, 1) * 50);
   if (!vals.length) return { value: null, explanation: "Not scored: no known crops." };
@@ -202,7 +206,8 @@ function weightedScore(comps: ScoreComponent[]): number | null {
   return wsum > 0 ? Math.round(acc / wsum) : null;
 }
 
-const countChanged = (a: CropSeason[], b: CropSeason[]) => a.reduce((n, s, i) => n + (b[i]?.cropId === s.cropId ? 0 : 1), 0);
+const canon = (id: string) => normaliseCropId(id ?? "");
+const countChanged = (a: CropSeason[], b: CropSeason[]) => a.reduce((n, s, i) => n + (b[i] && canon(b[i].cropId) === canon(s.cropId) ? 0 : 1), 0);
 
 // ───────────────────────────── checks ─────────────────────────────
 function checks(ctx: Ctx, seq: CropSeason[]): FeasibilityCheck[] {
@@ -256,8 +261,8 @@ function checks(ctx: Ctx, seq: CropSeason[]): FeasibilityCheck[] {
     const peakHigh = costs.length ? Math.max(...costs.map((c) => c.high)) : 0;
     out.push({
       id: "budget", label: "Input budget per season", passed: peakHigh <= ctx.budget, blocking: peakLow > ctx.budget,
-      detail: peakLow > ctx.budget ? `Even the low-cost estimate for the costliest season (${kes(peakLow)}) exceeds the ${kes(ctx.budget)} budget.`
-        : peakHigh > ctx.budget ? `The costliest season may exceed the ${kes(ctx.budget)} budget (up to ${kes(peakHigh)}).` : `Every season fits within the ${kes(ctx.budget)} budget.`,
+      detail: peakLow > ctx.budget ? `Even the low-cost estimate for the costliest season (${kes(peakLow)}) exceeds the ${budgetKes(ctx.budget)} budget.`
+        : peakHigh > ctx.budget ? `The costliest season may exceed the ${budgetKes(ctx.budget)} budget (up to ${kes(peakHigh)}).` : `Every season fits within the ${budgetKes(ctx.budget)} budget.`,
     });
   }
   const restricted = seq.map((s) => lookup(ctx, s.cropId)).filter((c): c is CropRule => !!c?.restricted);
@@ -290,7 +295,7 @@ function evidenceFor(ctx: Ctx, waterDemand: number | null, cost: { low: number; 
   ev.push({ id: "farmer-area", source: "FARMER_REPORTED", title: "Farm area", value: ctx.area, unit: "ha" });
   ev.push({ id: "farmer-priorities", source: "FARMER_REPORTED", title: "Farmer priorities", value: ctx.farm.priorities.join(", ") || null });
   ev.push({ id: "model-water-balance", source: "MODEL_ESTIMATE", title: "Rotation crop water demand (mid estimate)", value: waterDemand, unit: "mm", note: "Sum of mid-range seasonal crop water need; estimate, not a measurement." });
-  ev.push({ id: "model-cost", source: "MODEL_ESTIMATE", title: "Rotation input cost range", value: cost ? `${kes(cost.low)} – ${kes(cost.high)}` : null, unit: "KES", note: "Demonstration cost assumptions; estimate, not a quote." });
+  ev.push({ id: "model-cost", source: "MODEL_ESTIMATE", title: "Rotation input cost range", value: cost ? formatKesRange(cost) : null, note: "Demonstration cost assumptions; estimate, not a quote." });
   ev.push({ id: "model-score", source: "MODEL_ESTIMATE", title: "Relative plan score (0–100)", value: score, note: "Relative comparison between the three plans, not a certified soil or yield rating." });
   return ev;
 }
@@ -319,7 +324,7 @@ function evaluatePlan(ctx: Ctx, id: PlanId, seq: CropSeason[], extraConstraints:
 
   // missing info (every unknown)
   const missing: string[] = [];
-  if (!ctx.climate) missing.push("Climate context (NASA rainfall and temperature) unavailable — water and climate not scored");
+  if (!ctx.climate) missing.push("Climate context (rainfall and temperature) unavailable — water and climate not scored");
   else {
     if (!ctx.hasRain) missing.push("Mean annual rainfall unknown — water not scored");
     if (!finite(ctx.meanT)) missing.push("Mean temperature unknown — climate fit not scored");
@@ -357,7 +362,7 @@ function evaluatePlan(ctx: Ctx, id: PlanId, seq: CropSeason[], extraConstraints:
   if (seq.length && !pairs.length) benefits.push("No back-to-back crops from the same pest group.");
   for (const [a, b] of pairs) {
     const c = lookup(ctx, seq[a].cropId);
-    risks.push(a === b ? `${c?.name} every season: pest and disease build-up risk.` : `${c?.name} → ${lookup(ctx, seq[b].cropId)?.name} (${slotLabel(seq[a])} → ${slotLabel(seq[b])}) share the "${c?.pestGroup}" pest group.`);
+    risks.push(a === b ? `${c?.name} every season: pest and disease build-up risk.` : `${c?.name} → ${lookup(ctx, seq[b].cropId)?.name} (${slotLabel(seq[a])} → ${slotLabel(seq[b])}) share pests and diseases (${pestGroupLabel(c?.pestGroup ?? "")}).`);
   }
   if (tolerant) benefits.push(`Drought-tolerant crops in ${tolerant} of ${seq.length} seasons.`);
   for (const i of waterRiskSlots(ctx, seq)) risks.push(`Water shortfall risk for ${lookup(ctx, seq[i].cropId)?.name} in ${slotLabel(seq[i])}.`);
@@ -402,8 +407,7 @@ function evaluatePlan(ctx: Ctx, id: PlanId, seq: CropSeason[], extraConstraints:
 }
 
 // ───────────────────────────── generation ─────────────────────────────
-const sameSeq = (a: CropSeason[], b: CropSeason[]) => a.length === b.length && a.every((s, i) => normal(s.cropId) === normal(b[i].cropId));
-const normal = (id: string) => (id ?? "").trim().toLowerCase();
+const sameSeq = (a: CropSeason[], b: CropSeason[]) => a.length === b.length && a.every((s, i) => canon(s.cropId) === canon(b[i].cropId));
 
 /** In-season, unrestricted manifest crops for a slot (empty for unknown season names). */
 function options(ctx: Ctx, slot: CropSeason): CropRule[] {
@@ -436,7 +440,7 @@ function generateMinimum(ctx: Ctx): CropSeason[] | null {
     return { seq, vec: issueVector(ctx, seq), unfamiliar, score: quickScore(ctx, seq), order: order++ };
   };
   const singles: Cand[] = [];
-  cur.forEach((s, i) => { for (const c of options(ctx, s)) if (c.id !== normal(s.cropId)) singles.push(make([[i, c]])); });
+  cur.forEach((s, i) => { for (const c of options(ctx, s)) if (c.id !== canon(s.cropId)) singles.push(make([[i, c]])); });
   if (!singles.length) return null;
   const rank = (a: Cand, b: Cand) => lexCmp(a.vec, b.vec) || a.unfamiliar - b.unfamiliar || b.score - a.score || a.order - b.order;
   const noWorse = (c: Cand) => c.vec[0] <= base[0];
@@ -452,8 +456,8 @@ function generateMinimum(ctx: Ctx): CropSeason[] | null {
   const doubles: Cand[] = [];
   for (let i = 0; i < cur.length; i++) for (let j = i + 1; j < cur.length; j++) {
     for (const a of options(ctx, cur[i])) {
-      if (a.id === normal(cur[i].cropId)) continue;
-      for (const b of options(ctx, cur[j])) if (b.id !== normal(cur[j].cropId)) doubles.push(make([[i, a], [j, b]]));
+      if (a.id === canon(cur[i].cropId)) continue;
+      for (const b of options(ctx, cur[j])) if (b.id !== canon(cur[j].cropId)) doubles.push(make([[i, a], [j, b]]));
     }
   }
   const t2 = doubles.filter((c) => noWorse(c) && fully(c));
@@ -527,7 +531,7 @@ export function evaluateRotations(
 ): RotationEvaluation {
   const crops = options?.crops ?? CROPS;
   const current = (Array.isArray(farm?.rotation) ? farm.rotation : []).map((s) => ({
-    season: typeof s?.season === "string" ? s.season : "", cropId: typeof s?.cropId === "string" ? s.cropId : "",
+    season: typeof s?.season === "string" ? s.season : "", cropId: typeof s?.cropId === "string" ? (getCrop(s.cropId, crops)?.id ?? s.cropId) : "",
     yearOffset: finite(s?.yearOffset) ? s.yearOffset : 0,
   }));
   const ctx: Ctx = {
@@ -541,7 +545,7 @@ export function evaluateRotations(
   if (current.length === 0) {
     const msg = "The farm rotation is empty — add at least one season and crop on My Farm before plans can be compared.";
     const plans = PLAN_ORDER.map((id) => evaluatePlan(ctx, id, [], id === "current" ? [] : ["No alternative can be built without the farm's season slots."]));
-    return { plans, recommendedId: null, recommendationReason: msg, weights, currency: "KES" };
+    return { plans, recommendedId: null, recommendationReason: msg, weights, currency: "KES", provenance: dataProvenance(climate, soil) };
   }
 
   const currentPlan = evaluatePlan(ctx, "current", current);
@@ -585,17 +589,5 @@ export function evaluateRotations(
       + (rejected.length ? ` Rejected before ranking: ${rejected.join(", ")}.` : "")
       + " Scores are relative estimates, not a guarantee.";
   }
-  return { plans, recommendedId: best?.id ?? null, recommendationReason, weights, currency: "KES" };
-}
-
-/** Plain-language name of the worst issue in a sequence (for UI/explanations). */
-export function describeWorstIssue(farm: FarmProfile, climate: ClimateContext | null, soil: SoilInput | null): string | null {
-  const ctx: Ctx = {
-    farm, climate, soil, crops: CROPS, area: effectiveArea(farm), budget: effectiveBudget(farm),
-    meanT: finite(climate?.meanTemperatureC) ? (climate!.meanTemperatureC as number) : null,
-    hasRain: finite(climate?.annualRainfallMm), weights: computeWeights(farm.priorities), current: farm.rotation ?? [],
-  };
-  const v = issueVector(ctx, ctx.current);
-  const i = v.findIndex((x) => x > 0);
-  return i < 0 ? null : ISSUE_NAMES[i];
+  return { plans, recommendedId: best?.id ?? null, recommendationReason, weights, currency: "KES", provenance: dataProvenance(climate, soil) };
 }

@@ -1,23 +1,13 @@
-// Moen · Rotation Planner display helpers. Rounding is deliberate (R10: no false precision).
-import type { ChangeSize, EvaluatedPlan, Range } from "../../logic/agronomy/types";
+// Moen · Rotation Planner display helpers.
+import { formatMm } from "../../logic/agronomy";
+import type { ChangeSize, EvaluatedPlan } from "../../logic/agronomy/types";
 
-const nf = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+/** Shared formatters from the model (single source of truth for KES / mm / number formatting). */
+export { formatKes, formatKesRange, formatMm, formatNumber } from "../../logic/agronomy";
 
-/** Round KES to the nearest 1,000 (or 100 below 10,000) so estimates never look exact. */
-export function roundKes(n: number): number {
-  const step = Math.abs(n) >= 10_000 ? 1000 : 100;
-  return Math.round(n / step) * step;
-}
-export const kes = (n: number) => `KES ${nf.format(roundKes(n))}`;
-export function kesRange(r: Range | null | undefined): string {
-  if (!r) return "Unknown";
-  const lo = roundKes(r.low), hi = roundKes(r.high);
-  return lo === hi ? `KES ≈ ${nf.format(lo)}` : `KES ${nf.format(lo)} – ${nf.format(hi)}`;
-}
-/** Water demand rounded to 10 mm. */
+/** Water demand: "≈ 2,350 mm" (the model already rounds); null → "Unknown". */
 export function waterText(mm: number | null | undefined): string {
-  if (mm == null || !Number.isFinite(mm)) return "Unknown";
-  return `≈ ${nf.format(Math.round(mm / 10) * 10)} mm`;
+  return mm == null || !Number.isFinite(mm) ? "Unknown" : `≈ ${formatMm(mm)}`;
 }
 export function scoreText(plan: Pick<EvaluatedPlan, "feasible" | "score">): string {
   if (!plan.feasible) return "Not scored — infeasible";
@@ -29,8 +19,8 @@ export function changeText(size: ChangeSize, changed: number, total: number): st
   return `${size === "small" ? "Small" : "Large"} change · ${changed} of ${total} seasons`;
 }
 export const budgetFitText: Record<EvaluatedPlan["budgetFit"], string> = {
-  within: "Within budget",
-  over: "Over budget",
+  within: "Within budget per season",
+  over: "May exceed budget per season",
   unknown: "Budget not given",
 };
 export const confidenceText = (c: EvaluatedPlan["confidence"]) => `${c[0].toUpperCase()}${c.slice(1)} confidence`;

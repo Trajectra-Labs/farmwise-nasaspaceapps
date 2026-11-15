@@ -47,6 +47,15 @@ for (const theme of ["light", "dark"] as const) {
   });
 }
 
+test("axe at 375px, dark, page and open compare dialog", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await open(page, "dark");
+  await axe(page, "main");
+  await page.getByRole("button", { name: "Compare all" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await axe(page, "[role=dialog]");
+});
+
 test("keyboard-only path: select via arrows, open/close why drawer and compare dialog, use in scenarios", async ({ page }) => {
   await open(page, "light");
   const radio = (id: string) => page.getByTestId(`plan-card-${id}`).getByRole("radio");

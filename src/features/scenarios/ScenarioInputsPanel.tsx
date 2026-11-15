@@ -2,6 +2,7 @@
 // "Scenario-adjusted inputs" (model estimates). Kept visually and semantically separate.
 import type { ClimateContext, FarmProfile, ScenarioInputs, SoilInput } from "@fw/contracts";
 import { SourceBadge } from "@fw/ui";
+import { formatMm } from "../../logic/agronomy";
 import { fmtIrrigation, fmtPct, fmtTemp, isNum, UNKNOWN } from "./format";
 
 const IRRIGATION_TEXT: Record<FarmProfile["irrigation"], string> = { rainfed: "Rainfed (no irrigation)", limited: "Limited irrigation", regular: "Regular irrigation" };
@@ -15,23 +16,29 @@ export function ScenarioInputsPanel({ climate, soil, farm, inputs, waterSupplyMm
   const adjRain = rain == null ? null : Math.max(0, Math.round(rain * (1 + inputs.rainfallDeltaPct / 100)));
   const adjTemp = temp == null ? null : Math.round((temp + inputs.temperatureDeltaC) * 10) / 10;
   const rainfed = farm.irrigation === "rainfed";
+  const noClimate = !climate;
+  const unknownClimate = "Unknown (climate data unavailable)";
   return (
     <div className="scn-inputs">
       <section className="scn-inputs__panel scn-inputs__panel--observed" aria-labelledby="scn-observed-h">
         <h3 id="scn-observed-h">Observed inputs</h3>
-        <p className="scn-inputs__note">What the model starts from. Historical and simulated values, not a forecast.</p>
+        <p className="scn-inputs__note">
+          {noClimate
+            ? "Climate data could not be loaded, so no NASA values are used. Only farm and soil inputs are shown."
+            : "What the model starts from. Historical and simulated values, not a forecast."}
+        </p>
         <dl className="scn-kv">
           <div>
             <dt>Mean annual rainfall</dt>
-            <dd>{rain == null ? UNKNOWN : `${rain.toLocaleString("en-US")} mm/yr`} <SourceBadge source={climateSource} /></dd>
+            <dd>{rain == null ? (noClimate ? unknownClimate : UNKNOWN) : <>{formatMm(rain)}/yr <SourceBadge source={climateSource} /></>}</dd>
           </div>
           <div>
             <dt>Mean air temperature</dt>
-            <dd>{temp == null ? UNKNOWN : `${temp.toFixed(1)} °C`} <SourceBadge source={climateSource} /></dd>
+            <dd>{temp == null ? (noClimate ? unknownClimate : UNKNOWN) : <>{temp.toFixed(1)} °C <SourceBadge source={climateSource} /></>}</dd>
           </div>
           <div>
             <dt>Observation period</dt>
-            <dd>{climate?.observedPeriod ?? UNKNOWN}</dd>
+            <dd>{climate?.observedPeriod ?? (noClimate ? unknownClimate : UNKNOWN)}</dd>
           </div>
           <div>
             <dt>Soil moisture</dt>
@@ -49,11 +56,11 @@ export function ScenarioInputsPanel({ climate, soil, farm, inputs, waterSupplyMm
         <dl className="scn-kv">
           <div>
             <dt>Rainfall ({fmtPct(inputs.rainfallDeltaPct)})</dt>
-            <dd>{adjRain == null ? UNKNOWN : `${adjRain.toLocaleString("en-US")} mm/yr`} <SourceBadge source="MODEL_ESTIMATE" /></dd>
+            <dd>{adjRain == null ? UNKNOWN : <>{formatMm(adjRain)}/yr <SourceBadge source="MODEL_ESTIMATE" /></>}</dd>
           </div>
           <div>
             <dt>Temperature ({fmtTemp(inputs.temperatureDeltaC)})</dt>
-            <dd>{adjTemp == null ? UNKNOWN : `${adjTemp.toFixed(1)} °C`} <SourceBadge source="MODEL_ESTIMATE" /></dd>
+            <dd>{adjTemp == null ? UNKNOWN : <>{adjTemp.toFixed(1)} °C <SourceBadge source="MODEL_ESTIMATE" /></>}</dd>
           </div>
           <div>
             <dt>Irrigation water available</dt>
@@ -65,7 +72,7 @@ export function ScenarioInputsPanel({ climate, soil, farm, inputs, waterSupplyMm
           </div>
           <div>
             <dt>Water available to crops</dt>
-            <dd>{isNum(waterSupplyMm) ? `${Math.round(waterSupplyMm).toLocaleString("en-US")} mm over rotation` : UNKNOWN} <SourceBadge source="MODEL_ESTIMATE" /></dd>
+            <dd>{isNum(waterSupplyMm) ? <>{formatMm(waterSupplyMm)} over rotation <SourceBadge source="MODEL_ESTIMATE" /></> : UNKNOWN}</dd>
           </div>
         </dl>
       </section>

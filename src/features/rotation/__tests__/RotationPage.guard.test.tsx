@@ -16,7 +16,7 @@ function plan(id: EvaluatedPlan["id"], feasible: boolean, score: number | null):
     changeSize: id === "current" ? "none" : "small", changedSeasons: id === "current" ? 0 : 1,
     checks: [{ id: "c1", label: "Restricted crops", passed: feasible, blocking: true, detail: feasible ? "ok" : "restricted crop" }],
     components: [{ key: "water", label: "Water", weight: 1, value: feasible ? 60 : null, explanation: "x" }],
-    missingInfo: [], waterDemandMm: 1234, costRangeKes: { low: 81234, high: 120499 }, costBasis: "farm", budgetFit: "within",
+    missingInfo: [], waterDemandMm: 1234, costRangeKes: { low: 81000, high: 120000 }, costBasis: "farm", budgetFit: "within",
     evidence: [], reasons: [],
   };
 }
@@ -48,9 +48,9 @@ describe("Rotation Planner recommendation guard", () => {
     const use = within(details).getByRole("button", { name: "Use in scenarios" });
     expect(use).toBeDisabled();
     expect(use).toHaveAccessibleDescription(/turned off for this plan/);
-    // weights shown as percentages; costs rounded to thousands (R10)
+    // weights shown as percentages; costs use the shared KES range formatter (R10)
     expect(within(details).getByRole("cell", { name: "30%" })).toBeInTheDocument();
     expect(res).toHaveTextContent("KES 81,000 – 120,000");
-    expect(res).toHaveTextContent("≈ 1,230 mm");
+    expect(res).toHaveTextContent("≈ 1,234 mm over the rotation");
   });
 });

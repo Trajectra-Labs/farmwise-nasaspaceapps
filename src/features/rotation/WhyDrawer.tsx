@@ -1,11 +1,22 @@
 import { Badge, Button, Drawer, SourceBadge } from "@fw/ui";
 import type { Evidence } from "@fw/contracts";
 import type { EvaluatedPlan } from "../../logic/agronomy/types";
-import { confidenceText, scoreText } from "./format";
+import { confidenceText, formatKes, formatNumber, scoreText } from "./format";
 import { ruleSource } from "./logicBridge";
 
+/** Value with unit, never doubling a unit already in the value; KES amounts use the shared formatter. */
+export function evidenceValue(ev: Pick<Evidence, "value" | "unit">): string {
+  const { value, unit } = ev;
+  if (value == null || value === "") return "Unknown";
+  if (typeof value === "number") {
+    if (unit && /^KES\b/.test(unit)) return `${formatKes(value)}${unit.slice(3)}`;
+    return unit ? `${formatNumber(value, 1)} ${unit}` : formatNumber(value, 1);
+  }
+  return unit && !value.includes(unit) ? `${value} ${unit}` : value;
+}
+
 function EvidenceItem({ ev }: { ev: Evidence }) {
-  const value = ev.value == null ? "Unknown" : `${typeof ev.value === "number" ? Math.round(ev.value * 10) / 10 : ev.value}${ev.unit ? ` ${ev.unit}` : ""}`;
+  const value = evidenceValue(ev);
   return (
     <li className="rot-ev">
       <div className="rot-row">
@@ -17,7 +28,7 @@ function EvidenceItem({ ev }: { ev: Evidence }) {
         {ev.period ? <span>Period: {ev.period}</span> : null}
         {ev.spatialScale ? <span>Scale: {ev.spatialScale}</span> : null}
       </div>
-      {ev.note ? <p className="rot-small fw-muted">{ev.note}</p> : null}
+      {ev.note ? <p className="rot-small rot-muted">{ev.note}</p> : null}
       {ev.url ? (
         <a href={ev.url} target="_blank" rel="noopener noreferrer" className="rot-link">
           Open source for “{ev.title}” (external site, opens in new tab)
@@ -47,7 +58,7 @@ export function WhyDrawer({ plan, open, onClose }: { plan: EvaluatedPlan | null;
 
         <section aria-labelledby="why-reasons">
           <h3 id="why-reasons">Reasons</h3>
-          {plan.reasons.length === 0 ? <p className="fw-muted">No reasons recorded.</p> : (
+          {plan.reasons.length === 0 ? <p className="rot-muted">No reasons recorded.</p> : (
             <ol className="rot-reasons">
               {plan.reasons.map((r, i) => {
                 const evs = r.evidenceIds.map((id) => evById.get(id)).filter((e): e is Evidence => !!e);
@@ -87,17 +98,17 @@ export function WhyDrawer({ plan, open, onClose }: { plan: EvaluatedPlan | null;
 
         <section aria-labelledby="why-risks">
           <h3 id="why-risks">Risks</h3>
-          {plan.risks.length ? <ul className="rot-list">{plan.risks.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p className="fw-muted">No major risks flagged.</p>}
+          {plan.risks.length ? <ul className="rot-list">{plan.risks.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p className="rot-muted">No major risks flagged.</p>}
         </section>
 
         <section aria-labelledby="why-unknowns">
           <h3 id="why-unknowns">Unknowns and missing information</h3>
-          {plan.missingInfo.length ? <ul className="rot-list">{plan.missingInfo.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p className="fw-muted">No important inputs are missing.</p>}
+          {plan.missingInfo.length ? <ul className="rot-list">{plan.missingInfo.map((t, i) => <li key={i}>{t}</li>)}</ul> : <p className="rot-muted">No important inputs are missing.</p>}
         </section>
 
         <section aria-labelledby="why-evidence">
           <h3 id="why-evidence">All evidence used ({plan.evidence.length})</h3>
-          {plan.evidence.length ? <ul className="rot-ev-list">{plan.evidence.map((e) => <EvidenceItem key={e.id} ev={e} />)}</ul> : <p className="fw-muted">No evidence linked.</p>}
+          {plan.evidence.length ? <ul className="rot-ev-list">{plan.evidence.map((e) => <EvidenceItem key={e.id} ev={e} />)}</ul> : <p className="rot-muted">No evidence linked.</p>}
         </section>
 
         <section aria-labelledby="why-score">

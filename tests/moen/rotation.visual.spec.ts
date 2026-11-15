@@ -5,14 +5,23 @@ const DIR = "docs/qa/screenshots/moen";
 const WIDTHS = [320, 375, 768, 1024, 1440];
 const THEMES = ["light", "dark"] as const;
 
-async function open(page: Page, theme: (typeof THEMES)[number], width: number) {
+const SAMPLE_FARM = {
+  id: "sample-nakuru-01", name: "Sample farm · Nakuru (demo)", lat: -0.3, lon: 36.07, areaHa: 2, irrigation: "limited",
+  rotation: [
+    { season: "Long rains", cropId: "maize", yearOffset: 0 }, { season: "Short rains", cropId: "maize", yearOffset: 0 },
+    { season: "Long rains", cropId: "maize", yearOffset: 1 }, { season: "Short rains", cropId: "beans", yearOffset: 1 },
+  ],
+  priorities: ["water", "soil"], budget: 120000, notes: "Sample farm for demonstration.",
+};
+
+async function open(page: Page, theme: (typeof THEMES)[number], width: number, extra: Record<string, unknown> = {}) {
   await page.setViewportSize({ width, height: 900 });
-  await page.addInitScript(([k, t]) => {
+  await page.addInitScript(([k, state]) => {
     if (!sessionStorage.getItem("fw-seeded")) {
-      localStorage.setItem(k, JSON.stringify({ theme: t }));
+      localStorage.setItem(k, JSON.stringify(state));
       sessionStorage.setItem("fw-seeded", "1");
     }
-  }, [KEY, theme] as const);
+  }, [KEY, { theme, ...extra }] as const);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/rotation");
   await expect(page.getByTestId("plan-card-current")).toBeVisible();
@@ -74,6 +83,52 @@ for (const theme of THEMES) {
     });
   }
 }
+
+// Real visual regression (deterministic app: no masks needed).
+for (const theme of THEMES) {
+  for (const width of [375, 1440]) {
+    test(`regression: page ${theme} ${width}px`, async ({ page }) => {
+      await open(page, theme, width);
+      await expect(page).toHaveScreenshot(`rotation-page-${theme}-${width}.png`, { fullPage: true });
+    });
+    test(`regression: compare dialog ${theme} ${width}px`, async ({ page }) => {
+      await open(page, theme, width);
+      await page.getByRole("button", { name: "Compare all" }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page).toHaveScreenshot(`rotation-compare-${theme}-${width}.png`);
+    });
+  }
+}
+
+test("climate error state (farm without coordinates) at 375 and 1440px", async ({ page }) => {
+  await open(page, "light", 375, { farm: { ...SAMPLE_FARM, lat: null, lon: null } });
+  await expect(page.getByRole("alert")).toContainText("Climate evidence could not load");
+  await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
+  await noHorizontalOverflow(page);
+  await page.screenshot({ path: `${DIR}/rotation-climate-error-light-375.png`, fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.reload();
+  await expect(page.getByRole("alert")).toContainText("Climate evidence could not load");
+  await noHorizontalOverflow(page);
+  await page.screenshot({ path: `${DIR}/rotation-climate-error-light-1440.png`, fullPage: true });
+});
+
+test("all-infeasible state (harness budget 40,000, rainfed, dry) at 375px dark", async ({ page }) => {
+  await open(page, "dark", 375, { soilPreset: "dry", farm: { ...SAMPLE_FARM, irrigation: "rainfed", budget: 40000 } });
+  await expect(page.getByTestId("recommended-badge")).toHaveCount(0);
+  await expect(page.getByText(/No plan is recommended/)).toBeVisible();
+  await noHorizontalOverflow(page);
+  await page.screenshot({ path: `${DIR}/rotation-infeasible-dark-375.png`, fullPage: true });
+});
+
+test("all-infeasible via harness Budget control", async ({ page }) => {
+  await open(page, "light", 1440);
+  await page.getByLabel("Budget (KES)").selectOption("40000");
+  await page.getByLabel("Irrigation").selectOption("rainfed");
+  await page.getByLabel("Soil preset (simulated)").selectOption("dry");
+  await expect(page.getByTestId("recommended-badge")).toHaveCount(0);
+  await page.screenshot({ path: `${DIR}/rotation-infeasible-light-1440.png`, fullPage: true });
+});
 
 test("no-farm empty state at 375px", async ({ page }) => {
   await open(page, "light", 375);

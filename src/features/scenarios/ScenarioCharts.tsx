@@ -4,6 +4,7 @@
 import { useId } from "react";
 import { Bar, BarChart, CartesianGrid, Label, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartFrame } from "@fw/ui";
+import { formatNumber } from "../../logic/agronomy";
 import { fmtDelta, fmtValue, deltaOf, isNum, type MetricRow } from "./format";
 
 type Datum = { name: string; current: number | null; selected: number | null };
@@ -11,8 +12,8 @@ type Datum = { name: string; current: number | null; selected: number | null };
 function Legend({ currentLabel, selectedLabel }: { currentLabel: string; selectedLabel: string }) {
   return (
     <ul className="scn-legend" aria-label="Legend">
-      <li><span className="scn-legend__swatch scn-legend__swatch--current" aria-hidden="true" />{currentLabel} <span className="fw-muted">(solid bar)</span></li>
-      <li><span className="scn-legend__swatch scn-legend__swatch--selected" aria-hidden="true" />{selectedLabel} <span className="fw-muted">(hatched bar)</span></li>
+      <li><span className="scn-legend__swatch scn-legend__swatch--current" aria-hidden="true" />{currentLabel} <span className="scn-muted">(solid bar)</span></li>
+      <li><span className="scn-legend__swatch scn-legend__swatch--selected" aria-hidden="true" />{selectedLabel} <span className="scn-muted">(hatched bar)</span></li>
       <li className="scn-legend__note">Both bars are scenario estimates from the model, not observed measurements.</li>
     </ul>
   );
@@ -30,7 +31,7 @@ function BeforeAfterChart({ data, kind, yLabel, currentLabel, selectedLabel }: {
 }) {
   const hatchId = `scn-hatch-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const tick = { fill: "var(--fw-text-2)", fontSize: 12 };
-  const fmtTick = (v: number) => (kind === "kes" ? `${Math.round(v / 1000).toLocaleString("en-US")}k` : String(v));
+  const fmtTick = (v: number) => (kind === "kes" ? `${formatNumber(v / 1000)}k` : String(v));
   const hasNegative = data.some((d) => (d.current ?? 0) < 0 || (d.selected ?? 0) < 0);
   return (
     <div className="scn-chart" aria-hidden="true">
@@ -51,7 +52,8 @@ function BeforeAfterChart({ data, kind, yLabel, currentLabel, selectedLabel }: {
           {hasNegative ? <ReferenceLine y={0} stroke="var(--fw-border-strong)" /> : null}
           <Tooltip
             cursor={{ fill: "var(--fw-elevated)" }}
-            contentStyle={{ background: "var(--fw-surface)", border: "1px solid var(--fw-border)", borderRadius: 12, color: "var(--fw-text)" }}
+            separator=": " wrapperStyle={{ maxWidth: "min(260px, 80vw)", zIndex: 2 }}
+            contentStyle={{ background: "var(--fw-surface)", border: "1px solid var(--fw-border)", borderRadius: 12, color: "var(--fw-text)", whiteSpace: "normal" }}
             labelStyle={{ color: "var(--fw-text)", fontWeight: 600 }}
             itemStyle={{ color: "var(--fw-text)" }}
             formatter={(v: number) => fmtValue(kind, v)}

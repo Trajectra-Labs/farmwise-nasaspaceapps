@@ -60,10 +60,12 @@ describe("Rotation Planner", () => {
     expect(dialog).toHaveClass("fw-dialog--xl");
     const table = within(dialog).getByRole("table");
     expect(within(table).getAllByRole("columnheader")).toHaveLength(4);
-    for (const label of ["Crop sequence", "Feasible", "Change size", "Score", "Confidence", "Recommended", "Budget fit"]) {
+    for (const label of ["Crop sequence", "Feasible", "Change size", "Score", "Confidence", "Recommended", "Budget fit (per season)"]) {
       expect(within(table).getByRole("rowheader", { name: label })).toBeInTheDocument();
     }
     expect(within(table).getByRole("rowheader", { name: /Input cost range \(KES\)/ })).toBeInTheDocument();
+    expect(within(table).getByRole("rowheader", { name: "Water need (rotation total)" })).toBeInTheDocument();
+    expect(within(table).getAllByText("(changed)", { exact: false }).length).toBeGreaterThan(0);
     await user.click(within(dialog).getAllByRole("button", { name: "Close" })[0]);
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(trigger).toHaveFocus();
@@ -170,32 +172,103 @@ describe("Rotation Planner", () => {
     expect(scoresAfter).not.toBe(scoresBefore);
   });
 
-  it("R10: costs are KES ranges rounded to whole thousands, with no profit promises", async () => {
+  it("R10: costs are KES ranges in whole thousands, with no profit promises", async () => {
     const { container } = renderRotation();
     await waitForPlans();
     const text = container.textContent ?? "";
     const costs = text.match(/KES [\d,]+ – [\d,]+/g) ?? [];
     expect(costs.length).toBeGreaterThanOrEqual(3);
     for (const c of costs) {
-      for (const n of c.replace("KES ", "").split(" – ")) expect(Number(n.replace(/,/g, "")) % 100).toBe(0);
+      for (const n of c.replace("KES ", "").split(" – ")) {
+        const v = Number(n.replace(/,/g, ""));
+        expect(Number.isInteger(v)).toBe(true);
+        expect(v % 1000).toBe(0);
+        expect(v).toBeGreaterThan(0);
+      }
     }
     expect(text).not.toMatch(/guarantee(d)? profit|profit guaranteed/i);
-    expect(text).not.toMatch(/\$|USD/);
+    expect(text).not.toMatch(/\$|USD|mm per ha/);
+    expect(screen.getByTestId("prov-climate")).toHaveTextContent(/\d{1,3}(,\d{3})* mm\/yr rain/);
+    expect(screen.getByTestId("prov-farmer")).toHaveTextContent("budget KES 120,000");
   });
 
-  it("R12: uses the shared UI components (Card, Badge, SourceBadge, Button, Dialog)", async () => {
+  it("REV-5: budget fit is a per-season model judgement", async () => {
+    renderRotation();
+    await waitForPlans();
+    const c = card("current");
+    const dd = within(c).getByText(/budget per season/).closest("dd")!;
+    expect(dd).toHaveTextContent(/May exceed budget per season|Within budget per season/);
+    expect(dd).not.toHaveTextContent(/Over budget/);
+    expect(dd.querySelector("[data-source='MODEL_ESTIMATE']")).not.toBeNull();
+    expect(dd.querySelector("[data-source='FARMER_REPORTED']")).toBeNull();
+  });
+
+  it("REV-11: the plan radio is named by the plan title regardless of selection", async () => {
     const { user } = renderRotation();
     await waitForPlans();
+    const title = within(card("minimum")).getByRole("heading", { level: 3 }).textContent ?? "";
+    expect(radioFor("minimum")).toHaveAccessibleName(title);
+    await user.click(radioFor("minimum"));
+    expect(radioFor("minimum")).toHaveAccessibleName(title);
+    expect(radioFor("minimum")).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("R12: plan cards, dialog and drawer behave like the shared components (roles, modal, close, focus return)", async () => {
+    const { user } = renderRotation();
+    await waitForPlans();
+    // cards are labelled regions with source badges next to model numbers
     for (const id of PLAN_IDS) {
-      expect(card(id)).toHaveClass("fw-card");
-      expect(card(id).querySelector(".fw-badge[data-source='MODEL_ESTIMATE']")).not.toBeNull();
-      expect(radioFor(id)).toHaveClass("fw-btn");
+      const title = within(card(id)).getByRole("heading", { level: 3 }).textContent ?? "";
+      expect(screen.getByRole("region", { name: title })).toBe(card(id));
+      expect(card(id).querySelector("[data-source='MODEL_ESTIMATE']")).not.toBeNull();
     }
     expect(screen.getByTestId("prov-climate").querySelector("[data-source^='NASA']")).not.toBeNull();
     expect(screen.getByTestId("prov-soil").querySelector("[data-source='SIMULATED_IOT']")).not.toBeNull();
     expect(screen.getByTestId("prov-farmer").querySelector("[data-source='FARMER_REPORTED']")).not.toBeNull();
-    await user.click(screen.getByRole("button", { name: "Compare all" }));
-    expect(screen.getByRole("dialog")).toHaveClass("fw-dialog");
+
+    for (const open of [
+      () => screen.getByRole("button", { name: "Compare all" }),
+      () => within(card("current")).getByRole("button", { name: /why this plan/i }),
+    ]) {
+      const trigger = open();
+      await user.click(trigger);
+      const dlg = screen.getByRole("dialog");
+      expect(dlg).toHaveAttribute("aria-modal", "true");
+      expect(dlg).toHaveAccessibleName();
+      expect(dlg).toContainElement(document.activeElement as HTMLElement);
+      const closeIcon = within(dlg).getAllByRole("button", { name: "Close" })[0];
+      await user.click(closeIcon);
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(trigger).toHaveFocus();
+    }
+  });
+
+  it("R08: budget and priorities edits in the shared store recalculate the cards", async () => {
+    const { user } = renderRotation();
+    await waitForPlans();
+    const scores = () => PLAN_IDS.map((id) => screen.getByTestId(`score-${id}`).textContent).join("|");
+    const fits = () => screen.getAllByText(/budget per season|Budget not given/).map((e) => e.textContent).join("|");
+    const s0 = scores(), f0 = fits();
+    await user.click(screen.getByRole("button", { name: "probe: budget 300k" }));
+    expect(screen.getByTestId("prov-farmer")).toHaveTextContent("budget KES 300,000");
+    expect(fits()).not.toBe(f0);
+    expect(scores()).not.toBe(s0);
+    const s1 = scores();
+    await user.click(screen.getByRole("button", { name: "probe: priorities cost" }));
+    expect(scores()).not.toBe(s1);
+  });
+
+  it("alias crop ids: an identical crop written as 'bean' is not marked as changed", async () => {
+    renderRotation({ farm: { ...SAMPLE_FARM, rotation: SAMPLE_FARM.rotation.map((r) => (r.cropId === "beans" ? { ...r, cropId: "bean" } : r)) } });
+    await waitForPlans();
+    const seq = within(card("minimum")).getByRole("list", { name: /crop sequence/i });
+    for (const li of within(seq).getAllByRole("listitem")) {
+      if (/Common beans/.test(li.textContent ?? "") && /Year 2 · Short rains/.test(li.textContent ?? "")) {
+        expect(li).not.toHaveTextContent("(changed)");
+      }
+    }
+    const changed = within(seq).queryAllByText("(changed)", { exact: false }).length;
+    expect(changed).toBe(Number(/(\d+) of/.exec(within(card("minimum")).getByText(/change ·|No change/).textContent ?? "")?.[1] ?? 0));
   });
 
   it("shows a USER_SOIL_TEST badge when the farm has its own soil test", async () => {

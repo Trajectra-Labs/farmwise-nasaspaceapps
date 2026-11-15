@@ -2,19 +2,17 @@
 // runScenario(); this file just turns them into honest, finite display strings.
 import type { ScenarioInputs } from "@fw/contracts";
 import type { DetailedScenarioResult, Range } from "../../logic/agronomy/types";
-import { formatKes } from "../../logic/agronomy";
+import { formatKes, formatKesRange, formatMm, formatNumber, formatSignedKes } from "../../logic/agronomy";
 
 export const UNKNOWN = "Unknown";
-const MINUS = "−";
 
 export const isNum = (v: number | null | undefined): v is number => typeof v === "number" && Number.isFinite(v);
 
-/** Signed number with a real minus sign; "±0" for zero. */
+/** Explicit "+" for positive values; negatives get U+2212 from the shared formatNumber; zero is plain "0". */
 export function signed(v: number, digits = 0, unit = ""): string {
-  const r = Number(v.toFixed(digits));
-  const abs = Math.abs(r).toFixed(digits);
-  if (r === 0) return `±${abs}${unit}`;
-  return `${r > 0 ? "+" : MINUS}${abs}${unit}`;
+  const text = formatNumber(v, digits);
+  const isZero = Number(v.toFixed(digits)) === 0;
+  return `${!isZero && v > 0 ? "+" : ""}${isZero ? formatNumber(0) : text}${unit}`;
 }
 
 export const fmtPct = (v: number) => signed(v, 0, "%");
@@ -66,13 +64,15 @@ function rowsOf(result: DetailedScenarioResult): MetricRow[] {
 export function fmtValue(kind: MetricKind, v: number | null): string {
   if (!isNum(v)) return UNKNOWN;
   if (kind === "kes") return formatKes(v);
-  if (kind === "mm") return `${Math.round(v).toLocaleString("en-US")} mm`;
-  return String(Math.round(v));
+  if (kind === "mm") return formatMm(v);
+  return formatNumber(v);
 }
 
 export function fmtRangeOf(kind: MetricKind, r: Range | null): string | null {
   if (!r) return null;
-  return `${fmtValue(kind, r.low)} – ${fmtValue(kind, r.high)}`;
+  if (kind === "kes") return formatKesRange(r);
+  if (kind === "mm") return `${formatNumber(r.low)} – ${formatMm(r.high)}`;
+  return `${formatNumber(r.low)} – ${formatNumber(r.high)}`;
 }
 
 export function deltaOf(row: MetricRow): number | null {
@@ -81,11 +81,7 @@ export function deltaOf(row: MetricRow): number | null {
 
 export function fmtDelta(kind: MetricKind, d: number | null): string {
   if (!isNum(d)) return UNKNOWN;
-  if (kind === "kes") {
-    const rounded = Math.round(d / 100) * 100;
-    if (rounded === 0) return "±KES 0";
-    return `${rounded > 0 ? "+" : MINUS}${formatKes(Math.abs(rounded))}`;
-  }
+  if (kind === "kes") return formatSignedKes(d);
   if (kind === "mm") return signed(d, 0, " mm");
   return signed(d, 0);
 }

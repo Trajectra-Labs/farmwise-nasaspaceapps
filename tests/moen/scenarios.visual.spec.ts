@@ -25,6 +25,10 @@ for (const theme of ["light", "dark"] as const) {
       const fits = await wrap.evaluate((el) => el.getBoundingClientRect().right <= window.innerWidth + 0.5);
       expect(fits).toBe(true);
       await page.screenshot({ path: `${DIR}/scenarios-${theme}-${width}.png`, fullPage: true, animations: "disabled" });
+      if (width === 375 || width === 1440) {
+        // Stable visual regression baseline (tests/moen/scenarios.visual.spec.ts-snapshots/).
+        await expect(page).toHaveScreenshot(`scenarios-${theme}-${width}.png`, { fullPage: true });
+      }
     });
   }
   for (const width of [375, 1440]) {
@@ -36,6 +40,7 @@ for (const theme of ["light", "dark"] as const) {
       await expect(page.getByRole("dialog", { name: "Scenario assumptions" })).toBeVisible();
       await expectNoHorizontalOverflow(page);
       await page.screenshot({ path: `${DIR}/scenarios-drawer-${theme}-${width}.png`, animations: "disabled" });
+      await expect(page).toHaveScreenshot(`scenarios-drawer-${theme}-${width}.png`);
     });
   }
 }
@@ -48,3 +53,40 @@ test("scenarios custom scenario at 375 (dark)", async ({ page }) => {
   await expectNoHorizontalOverflow(page);
   await page.screenshot({ path: `${DIR}/scenarios-custom-dark-375.png`, fullPage: true, animations: "disabled" });
 });
+
+for (const theme of ["light", "dark"] as const) {
+  test(`scenarios climate error state ${theme} 375px`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+    await seed(page, { theme, farm: { id: "no-location", name: "Farm without location", lat: null, lon: null, areaHa: 2, irrigation: "limited",
+      rotation: [{ season: "Long rains", cropId: "maize", yearOffset: 0 }, { season: "Short rains", cropId: "beans", yearOffset: 0 }],
+      priorities: ["water"], budget: 120000, notes: "" } });
+    await page.goto("/scenarios");
+    await expect(page.getByRole("heading", { name: "Climate data unavailable" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Retry" })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expectNoBadNumbers(page);
+    await page.screenshot({ path: `${DIR}/scenarios-error-${theme}-375.png`, fullPage: true, animations: "disabled" });
+  });
+
+  test(`scenarios empty (no farm) state ${theme} 375px`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+    await seed(page, { theme, farm: null });
+    await page.goto("/scenarios");
+    await expect(page.getByRole("heading", { name: "No farm set up yet" })).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({ path: `${DIR}/scenarios-empty-${theme}-375.png`, fullPage: true, animations: "disabled" });
+  });
+
+  test(`scenarios chart tooltip ${theme} 1024px`, async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 900 });
+    await seed(page, { theme, activePlanId: "resilience" });
+    await openStudio(page);
+    const chart = page.locator(".scn-chart").nth(1);
+    await chart.scrollIntoViewIfNeeded();
+    await chart.locator(".recharts-bar-rectangle").first().hover();
+    const tip = chart.locator(".recharts-tooltip-wrapper");
+    await expect(tip).toBeVisible();
+    await expect(tip).toContainText("KES");
+    await page.screenshot({ path: `${DIR}/scenarios-tooltip-${theme}-1024.png`, animations: "disabled" });
+  });
+}

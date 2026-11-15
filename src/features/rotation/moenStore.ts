@@ -2,7 +2,7 @@
 // context, simulated soil). No new shared state is created here: everything is read from and
 // written to the central FarmWise store. At integration only the "@fw/*" aliases (and, if the
 // real useFarmWise() shape differs, the mapping in this file) need to change.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ClimateContext, FarmWiseState, ScenarioInputs, SoilInput } from "@fw/contracts";
 import { useFarmWise } from "@fw/core";
 import { getClimateContext } from "@fw/nasa";
@@ -35,12 +35,19 @@ export function useMoenData(): MoenData {
   const [climateError, setClimateError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
+  // Refetch only when the location changes (or on retry) — budget/irrigation/rotation edits must not
+  // refetch or blank climate. The latest farm is read through a ref so the effect deps stay narrow.
+  const farmRef = useRef(farm);
+  farmRef.current = farm;
+  const lat = farm?.lat ?? null;
+  const lon = farm?.lon ?? null;
+  const hasFarm = farm != null;
   useEffect(() => {
     let alive = true;
-    setClimateStatus("loading");
+    setClimateStatus("loading"); // keep the last good climate visible while refetching
     setClimateError(null);
     Promise.resolve()
-      .then(() => getClimateContext(farm))
+      .then(() => getClimateContext(farmRef.current))
       .then((c) => { if (alive) { setClimate(c); setClimateStatus("ready"); } })
       .catch((e: unknown) => {
         if (!alive) return;
@@ -49,7 +56,7 @@ export function useMoenData(): MoenData {
         setClimateError(e instanceof Error ? e.message : "Climate context unavailable.");
       });
     return () => { alive = false; };
-  }, [farm, attempt]);
+  }, [hasFarm, lat, lon, attempt]);
 
   const soil = useMemo<SoilInput | null>(() => {
     if (farm?.knownSoil && farm.knownSoil.source === "USER_SOIL_TEST") return farm.knownSoil;
@@ -57,8 +64,9 @@ export function useMoenData(): MoenData {
   }, [farm?.knownSoil, state.soilPreset]);
 
   // Evaluate even while climate is loading/failed: the model degrades to "missing info" + lower confidence.
+  // While refetching, the last good climate is still used (it is cleared only on error).
   const evaluation = useMemo(
-    () => (farm ? evaluateRotations(farm, climateStatus === "ready" ? climate : null, soil) : null),
+    () => (farm ? evaluateRotations(farm, climateStatus === "error" ? null : climate, soil) : null),
     [farm, climate, climateStatus, soil],
   );
 

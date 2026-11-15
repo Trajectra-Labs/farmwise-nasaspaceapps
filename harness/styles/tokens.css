@@ -12,6 +12,7 @@
   --fw-shadow-overlay: 0 12px 40px rgba(23,40,66,.22);
   --fw-focus: 0 0 0 3px #FFFFFF, 0 0 0 5px #2056A3;
   --fw-font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fw-backdrop: rgba(12, 20, 35, .45);
   --fw-z-overlay: 1000; --fw-z-toast: 1100;
   color-scheme: light;
 }
@@ -24,6 +25,7 @@
   --fw-chart-1: #91B9FF; --fw-chart-2: #FFAA70; --fw-chart-3: #8FD6A6;
   --fw-shadow-1: 0 1px 2px rgba(0,0,0,.4); --fw-shadow-overlay: 0 12px 40px rgba(0,0,0,.6);
   --fw-focus: 0 0 0 3px #0C1423, 0 0 0 5px #91B9FF;
+  --fw-backdrop: rgba(0, 0, 0, .72);
   color-scheme: dark;
 }
 * { box-sizing: border-box; }

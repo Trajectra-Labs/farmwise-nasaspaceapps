@@ -3,7 +3,7 @@ import type { EvaluatedPlan, RotationEvaluation } from "../../logic/agronomy/typ
 import { confidenceText, scoreText, weightPct } from "./format";
 
 function List({ items, empty }: { items: string[]; empty: string }) {
-  if (items.length === 0) return <p className="fw-muted">{empty}</p>;
+  if (items.length === 0) return <p className="rot-muted">{empty}</p>;
   return <ul className="rot-list">{items.map((t, i) => <li key={i}>{t}</li>)}</ul>;
 }
 
@@ -40,7 +40,7 @@ export function PlanDetails({ plan, evaluation, recommended, onUse, onWhy }: {
       <div className="rot-details__grid">
         <section aria-labelledby="rot-checks-h">
           <h3 id="rot-checks-h">Feasibility checks</h3>
-          {plan.checks.length === 0 ? <p className="fw-muted">No checks were run.</p> : (
+          {plan.checks.length === 0 ? <p className="rot-muted">No checks were run.</p> : (
             <ul className="rot-checks">
               {plan.checks.map((c) => (
                 <li key={c.id} className="rot-check">
@@ -68,7 +68,7 @@ export function PlanDetails({ plan, evaluation, recommended, onUse, onWhy }: {
           <h3 id="rot-breakdown-h">Score breakdown</h3>
           <SourceBadge source="MODEL_ESTIMATE" />
         </div>
-        <p className="fw-muted rot-small">
+        <p className="rot-muted rot-small">
           The score is a relative 0–100 comparison of these three plans for this farm, not a certified soil test or a yield promise.
           Each part is weighted; parts with missing inputs are shown as “Unknown”.
         </p>

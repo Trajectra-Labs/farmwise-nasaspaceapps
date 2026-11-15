@@ -1,6 +1,6 @@
 // Moen · the only place the Rotation Planner touches presentation helpers from src/logic/agronomy.
 import type { FarmProfile } from "@fw/contracts";
-import { cropName, formatRotationSummary, rotationEvaluationToJSON, SOURCES } from "../../logic/agronomy";
+import { cropName, formatRotationSummary, normaliseCropId, rotationEvaluationToJSON, SOURCES } from "../../logic/agronomy";
 import type { RotationEvaluation, SourceRef } from "../../logic/agronomy/types";
 
 export function cropLabel(cropId: string): string {
@@ -8,6 +8,15 @@ export function cropLabel(cropId: string): string {
     return cropName(cropId) || cropId;
   } catch {
     return cropId;
+  }
+}
+
+/** Crop ids are compared after alias normalisation ("bean" ≡ "beans"). */
+export function sameCrop(a: string, b: string): boolean {
+  try {
+    return normaliseCropId(a) === normaliseCropId(b);
+  } catch {
+    return a === b;
   }
 }
 

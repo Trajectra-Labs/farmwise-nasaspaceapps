@@ -1,22 +1,23 @@
 // Moen · S4 Scenario Studio. All state lives in the central store (useMoenData); the only local
 // state here is UI-only (drawer open, last clicked preset for the "modified from" label).
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { ScenarioInputs } from "@fw/contracts";
 import {
   Badge, Button, Card, EmptyState, ErrorState, Select, Skeleton, Slider, SourceBadge, TabPanel, Tabs, useToast,
 } from "@fw/ui";
+import { PlanSequence, copyText } from "../rotation";
 import { useMoenData } from "../rotation/moenStore";
 import {
-  DEFAULT_SCENARIO_INPUTS, SCENARIO_LIMITS, SCENARIO_PRESETS, clampScenarioInputs, cropName, formatScenarioSummary, matchPreset, runScenario,
+  DEFAULT_SCENARIO_INPUTS, SCENARIO_LIMITS, SCENARIO_PRESETS, clampScenarioInputs, formatScenarioSummary, matchPreset, runScenario,
 } from "../../logic/agronomy";
-import type { DetailedScenarioResult, EvaluatedPlan, PlanId, ScenarioPreset, ScenarioPresetId } from "../../logic/agronomy/types";
+import type { DetailedScenarioResult, PlanId, ScenarioPreset, ScenarioPresetId } from "../../logic/agronomy/types";
 import { AssumptionsDrawer } from "./AssumptionsDrawer";
 import { ScenarioCharts } from "./ScenarioCharts";
 import { ScenarioInputsPanel } from "./ScenarioInputsPanel";
 import { MetricTiles, ResultsTable } from "./ScenarioResults";
 import { buildMetricRows, fmtDelta, fmtIrrigation, fmtPct, fmtTemp, fmtValue, deltaOf, sameInputs } from "./format";
-import { copyText, downloadText } from "./share";
+import { downloadText } from "./share";
 import "./scenarios.css";
 
 const PRESETS: readonly ScenarioPreset[] = SCENARIO_PRESETS;
@@ -26,22 +27,10 @@ function presetById(id: ScenarioPresetId): ScenarioPreset {
   return PRESETS.find((p) => p.id === id) ?? PRESETS[0];
 }
 
-function PlanSequence({ plan }: { plan: EvaluatedPlan }) {
-  return (
-    <ol className="scn-seq" aria-label={`${plan.title} crop sequence`}>
-      {plan.seasons.map((s, i) => (
-        <li key={`${s.yearOffset}-${s.season}-${i}`} className="scn-seq__item">
-          <span className="scn-seq__when">Year {s.yearOffset + 1} · {s.season}</span>
-          <span className="scn-seq__crop">{cropName(s.cropId)}</span>
-        </li>
-      ))}
-    </ol>
-  );
-}
-
 export function ScenarioPage() {
   const { farm, climate, climateStatus, climateError, retryClimate, soil, evaluation, activePlanId, setActivePlanId, scenario, setScenario } = useMoenData();
   const toast = useToast();
+  const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matched = matchPreset(scenario);
   const [lastPreset, setLastPreset] = useState<ScenarioPresetId>(matched ?? "typical");
@@ -73,7 +62,7 @@ export function ScenarioPage() {
         <h1>Scenario Studio</h1>
         <EmptyState title="No farm set up yet"
           body="Scenario Studio needs your farm’s crops, location and irrigation before it can estimate anything."
-          action={<Link to="/onboarding" className="fw-btn fw-btn--primary">Set up your farm</Link>} />
+          action={<Button variant="primary" onClick={() => navigate("/onboarding")}>Set up your farm</Button>} />
       </div>
     );
   }
@@ -124,15 +113,16 @@ export function ScenarioPage() {
           <p className="scn-explainer">
             Explore what-if estimates for your rotation under different rainfall, temperature, irrigation and cost conditions.
             These are <strong>what-if estimates, not forecasts or guaranteed income</strong>: they come from a simple model built on
-            historical NASA climate data, simulated soil readings and typical crop figures.
+            {climateReady ? " historical NASA climate data (offline snapshot)," : " typical crop figures without climate data (climate is unavailable right now),"} {soil?.source === "USER_SOIL_TEST" ? "your soil test" : "simulated soil readings"} and typical crop costs and prices.
           </p>
         </div>
         <div className="scn-actions" role="group" aria-label="Scenario actions">
-          <Link to="/rotation" className="fw-btn fw-btn--ghost">← Back to Rotation Planner</Link>
-          <Button onClick={() => setDrawerOpen(true)}>Assumptions</Button>
-          <Button onClick={reset} disabled={atDefault} title={atDefault ? "Already at the Typical scenario" : undefined}>Reset</Button>
-          <Button onClick={copy} disabled={!result}>Copy summary</Button>
-          <Button onClick={download} disabled={!result}>Download .txt</Button>
+          <Button variant="ghost" className="scn-action" onClick={() => navigate("/rotation")}>← Back to Rotation Planner</Button>
+          <Button className="scn-action" onClick={() => setDrawerOpen(true)}>Assumptions</Button>
+          <Button className="scn-action" onClick={reset} disabled={atDefault} aria-describedby={atDefault ? "scn-reset-hint" : undefined}>Reset</Button>
+          <Button className="scn-action" onClick={copy} disabled={!result}>Copy summary</Button>
+          <Button className="scn-action" onClick={download} disabled={!result}>Download .txt</Button>
+          {atDefault ? <p id="scn-reset-hint" className="scn-reset-hint">Reset is off because the Typical scenario is already in use.</p> : null}
         </div>
       </header>
 
@@ -142,10 +132,10 @@ export function ScenarioPage() {
           <Select<PlanId> label="Compare current rotation with" value={selectedPlan?.id ?? activePlanId}
             onChange={(v) => setActivePlanId(v)} disabled={plans.length === 0}
             options={plans.map((p) => ({ value: p.id, label: `${p.title} (${p.feasible ? "feasible" : "not feasible"})` }))} />
-          {selectedPlan ? <PlanSequence plan={selectedPlan} /> : null}
+          {selectedPlan ? <PlanSequence seasons={selectedPlan.seasons} label={`${selectedPlan.title} crop sequence`} /> : null}
           {selectedPlan && !selectedPlan.feasible ? (
             <div className="scn-warning" role="note">
-              <Badge tone="danger">Not feasible</Badge>
+              <Badge tone="danger" className="scn-warning__badge">Not feasible</Badge>
               <p>This plan failed a feasibility check{selectedPlan.constraints[0] ? `: ${selectedPlan.constraints[0]}` : "."} Its numbers are shown for comparison only and it is not recommended.</p>
             </div>
           ) : null}
@@ -191,7 +181,7 @@ export function ScenarioPage() {
         </Card>
 
         <div className="scn-results">
-          <p className="fw-sr-only" aria-live="polite">{liveText}</p>
+          <p className="scn-sr-only" aria-live="polite">{liveText}</p>
           {climateStatus === "error" ? (
             <ErrorState title="Climate data unavailable"
               body={`${climateError ?? "The NASA climate snapshot could not be loaded."} Water and yield results are shown as Unknown until it loads.`}
@@ -245,7 +235,7 @@ export function ScenarioPage() {
           {result && climateStatus !== "loading" ? (
             <>
               <Card aria-labelledby="scn-chart-h">
-                <h2 id="scn-chart-h" className="fw-sr-only">Charts</h2>
+                <h2 id="scn-chart-h" className="scn-sr-only">Charts</h2>
                 <ScenarioCharts rows={rows} currentLabel={currentLabel} selectedLabel={selectedLabel} />
               </Card>
               <Card aria-labelledby="scn-table-h">
@@ -257,7 +247,7 @@ export function ScenarioPage() {
         </div>
       </div>
 
-      <AssumptionsDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} result={result} planTitle={planTitle}
+      <AssumptionsDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} result={result} planTitle={planTitle} climateAvailable={climateReady && !!climate}
         sources={climateReady && climate ? climate.evidence.filter((e) => e.url).map((e) => ({ title: `NASA POWER: ${e.title}`, url: e.url as string, period: e.period })) : []} />
     </div>
   );

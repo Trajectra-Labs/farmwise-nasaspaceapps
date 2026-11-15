@@ -11,7 +11,7 @@ function renderPage(init: Partial<FarmWiseState> = {}) {
   return render(
     <FarmWiseProvider initialState={{ farm: SAMPLE_FARM, ...init }}>
       <ToastProvider>
-        <MemoryRouter initialEntries={["/scenarios"]}>
+        <MemoryRouter initialEntries={["/scenarios"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/scenarios" element={<ScenarioPage />} />
             <Route path="/onboarding" element={<p>Onboarding route</p>} />
@@ -22,6 +22,9 @@ function renderPage(init: Partial<FarmWiseState> = {}) {
     </FarmWiseProvider>,
   );
 }
+
+/** Let pending promise-based state updates (climate context) settle inside act(). */
+const flush = () => act(async () => { await Promise.resolve(); });
 
 async function ready(init: Partial<FarmWiseState> = {}) {
   const utils = renderPage(init);
@@ -41,9 +44,10 @@ describe("Scenario Studio", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Scenario Studio" })).toBeInTheDocument();
     expect(screen.getByText(SAMPLE_FARM.name)).toBeInTheDocument();
     expect(screen.getByText(/what-if estimates, not forecasts or guaranteed income/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Back to Rotation Planner/ })).toHaveAttribute("href", "/rotation");
     expect(screen.getAllByText("NASA offline snapshot").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Simulated sensor").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: /Back to Rotation Planner/ }));
+    expect(screen.getByText("Rotation route")).toBeInTheDocument();
   });
 
   it("S01 each preset tab changes the sliders and the results", async () => {
@@ -148,6 +152,8 @@ describe("Scenario Studio", () => {
     await ready();
     const reset = screen.getByRole("button", { name: "Reset" });
     expect(reset).toBeDisabled();
+    expect(reset).toHaveAccessibleDescription(/Typical scenario is already in use/);
+    expect(screen.getByText(/Reset is off because/)).toBeVisible();
     const baseline = resultsText();
     fireEvent.click(screen.getByRole("tab", { name: "Drier" }));
     setSlider("Input cost change", 40);
@@ -247,8 +253,9 @@ describe("Scenario Studio", () => {
 
   it("no farm shows an empty state linking to onboarding", async () => {
     renderPage({ farm: null });
+    await flush();
     expect(screen.getByRole("heading", { name: "No farm set up yet" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("link", { name: "Set up your farm" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set up your farm" }));
     expect(screen.getByText("Onboarding route")).toBeInTheDocument();
   });
 
@@ -258,11 +265,22 @@ describe("Scenario Studio", () => {
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
     expect(screen.getAllByText(/Unknown/).length).toBeGreaterThan(0);
     expect(metric("waterIndex")).toBe("Unknown");
+    // Honest provenance: no NASA label or claim anywhere when climate failed to load.
+    expect(screen.queryByText("NASA offline snapshot")).not.toBeInTheDocument();
+    expect(screen.getByText(/no NASA values are used/)).toBeInTheDocument();
+    const unc = screen.getByRole("heading", { name: "Uncertainty" }).closest("section")!;
+    expect(unc.textContent).not.toMatch(/Rainfall comes from|NASA POWER offline snapshot/);
+    expect(screen.queryByText(/historical NASA climate data/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Assumptions" }));
+    const drawer = screen.getByRole("dialog", { name: "Scenario assumptions" });
+    expect(within(drawer).getByText(/no observed source was used/)).toBeInTheDocument();
+    expect(within(drawer).queryByRole("link")).not.toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/NaN|Infinity/);
   });
 
-  it("climate loading shows skeletons", () => {
+  it("climate loading shows skeletons", async () => {
     renderPage();
     expect(screen.getAllByRole("status", { name: /Loading climate data|Calculating scenario/ }).length).toBeGreaterThan(0);
+    await screen.findByRole("heading", { name: "Observed inputs" });
   });
 });

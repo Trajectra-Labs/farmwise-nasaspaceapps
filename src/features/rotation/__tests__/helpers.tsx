@@ -18,6 +18,8 @@ export function StoreProbe() {
       <button type="button" onClick={() => actions.updateFarm({ irrigation: "rainfed" })}>probe: rainfed</button>
       <button type="button" onClick={() => actions.updateFarm({ irrigation: "regular" })}>probe: regular</button>
       <button type="button" onClick={() => actions.updateFarm({ budget: 40000 })}>probe: budget 40k</button>
+      <button type="button" onClick={() => actions.updateFarm({ budget: 300000 })}>probe: budget 300k</button>
+      <button type="button" onClick={() => actions.updateFarm({ priorities: ["cost"] })}>probe: priorities cost</button>
     </div>
   );
 }

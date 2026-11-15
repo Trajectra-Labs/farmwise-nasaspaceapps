@@ -34,6 +34,19 @@ describe("Rotation Planner climate states", () => {
     expect(screen.getByTestId("prov-climate").querySelector("[data-source='NASA_OFFLINE_SNAPSHOT']")).not.toBeNull();
   });
 
+  it("REV-8: a budget or irrigation edit does not refetch or blank climate", async () => {
+    nasa.fail = false;
+    const { user } = renderRotation();
+    await waitFor(() => expect(screen.getByTestId("prov-climate").querySelector("[data-source='NASA_OFFLINE_SNAPSHOT']")).not.toBeNull());
+    const calls = nasa.calls;
+    await user.click(screen.getByRole("button", { name: "probe: budget 300k" }));
+    await user.click(screen.getByRole("button", { name: "probe: rainfed" }));
+    expect(screen.getByTestId("prov-farmer")).toHaveTextContent("budget KES 300,000");
+    expect(screen.queryByLabelText("Loading climate evidence")).toBeNull();
+    expect(screen.getByTestId("prov-climate").querySelector("[data-source='NASA_OFFLINE_SNAPSHOT']")).not.toBeNull();
+    expect(nasa.calls).toBe(calls);
+  });
+
   it("shows a skeleton while climate is loading", async () => {
     nasa.fail = false;
     renderRotation();

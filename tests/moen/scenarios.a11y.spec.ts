@@ -25,12 +25,24 @@ for (const theme of ["light", "dark"] as const) {
       await page.getByRole("button", { name: "Assumptions" }).click();
       const drawer = page.getByRole("dialog", { name: "Scenario assumptions" });
       await expect(drawer).toBeVisible();
-      // landmark-no-duplicate-banner comes from the shared Drawer's <header> (harness/ui, Shaheem-owned);
-      // reported upstream, not fixable in this feature folder.
-      const res = await new AxeBuilder({ page: page as unknown as AxePage }).include(".fw-drawer")
-        .disableRules(["landmark-no-duplicate-banner"]).analyze();
+      const res = await new AxeBuilder({ page: page as unknown as AxePage }).include(".fw-drawer").analyze();
       expect(res.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
     });
+  });
+}
+
+const violations = (res: { violations: { id: string; nodes: { target: unknown[] }[] }[] }) =>
+  res.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
+
+for (const theme of ["light", "dark"] as const) {
+  test(`375px: page and open drawer have no axe violations (${theme})`, async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await seed(page, { theme });
+    await openStudio(page);
+    expect(violations(await new AxeBuilder({ page: page as unknown as AxePage }).include("#main").analyze())).toEqual([]);
+    await page.getByRole("button", { name: "Assumptions" }).click();
+    await expect(page.getByRole("dialog", { name: "Scenario assumptions" })).toBeVisible();
+    expect(violations(await new AxeBuilder({ page: page as unknown as AxePage }).include(".fw-drawer").analyze())).toEqual([]);
   });
 }
 
