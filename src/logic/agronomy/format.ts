@@ -93,9 +93,10 @@ export function formatSignedKes(n: number | null | undefined): string {
   return r > 0 ? `+${formatKes(r)}` : formatKes(r);
 }
 
-/** "KES 330,000 – 560,000" (currency once, en dash); equal ends → "KES 330,000"; null → "Unknown". */
+/** "KES 330,000 – 560,000" (currency once, en dash); any negative end → "−KES 260,000 to KES 1,332,000"; equal ends → "KES 330,000"; null → "Unknown". */
 export function formatKesRange(r: Range | null | undefined): string {
   if (!r || !Number.isFinite(r.low) || !Number.isFinite(r.high)) return "Unknown";
+  if (Math.round(r.low) < 0 || Math.round(r.high) < 0) return `${formatKes(r.low)} to ${formatKes(r.high)}`;
   const lo = formatNumber(Math.round(r.low)), hi = formatNumber(Math.round(r.high));
   return lo === hi ? `KES ${lo}` : `KES ${lo} \u2013 ${hi}`;
 }

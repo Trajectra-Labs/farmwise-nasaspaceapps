@@ -46,7 +46,8 @@ describe("Scenario Studio", () => {
     expect(screen.getByText(/what-if estimates, not forecasts or guaranteed income/i)).toBeInTheDocument();
     expect(screen.getAllByText("NASA offline snapshot").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Simulated sensor").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: /Back to Rotation Planner/ }));
+    expect(screen.getByTestId("scn-climate-source")).toHaveTextContent(/NASA/);
+    fireEvent.click(screen.getByRole("link", { name: /Back to Rotation Planner/ }));
     expect(screen.getByText("Rotation route")).toBeInTheDocument();
   });
 
@@ -255,7 +256,7 @@ describe("Scenario Studio", () => {
     renderPage({ farm: null });
     await flush();
     expect(screen.getByRole("heading", { name: "No farm set up yet" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Set up your farm" }));
+    fireEvent.click(screen.getByRole("link", { name: "Set up your farm" }));
     expect(screen.getByText("Onboarding route")).toBeInTheDocument();
   });
 
@@ -270,7 +271,7 @@ describe("Scenario Studio", () => {
     expect(screen.getByText(/no NASA values are used/)).toBeInTheDocument();
     const unc = screen.getByRole("heading", { name: "Uncertainty" }).closest("section")!;
     expect(unc.textContent).not.toMatch(/Rainfall comes from|NASA POWER offline snapshot/);
-    expect(screen.queryByText(/historical NASA climate data/)).not.toBeInTheDocument();
+    expect(screen.getByTestId("scn-climate-source")).toHaveTextContent(/No climate data was available/);
     fireEvent.click(screen.getByRole("button", { name: "Assumptions" }));
     const drawer = screen.getByRole("dialog", { name: "Scenario assumptions" });
     expect(within(drawer).getByText(/no observed source was used/)).toBeInTheDocument();
@@ -281,6 +282,7 @@ describe("Scenario Studio", () => {
   it("climate loading shows skeletons", async () => {
     renderPage();
     expect(screen.getAllByRole("status", { name: /Loading climate data|Calculating scenario/ }).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("scn-climate-source")).toHaveTextContent("Loading climate data…");
     await screen.findByRole("heading", { name: "Observed inputs" });
   });
 });

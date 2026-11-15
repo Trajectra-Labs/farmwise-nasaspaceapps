@@ -1,15 +1,16 @@
 // Moen · S4 Scenario Studio. All state lives in the central store (useMoenData); the only local
 // state here is UI-only (drawer open, last clicked preset for the "modified from" label).
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import type { ScenarioInputs } from "@fw/contracts";
 import {
   Badge, Button, Card, EmptyState, ErrorState, Select, Skeleton, Slider, SourceBadge, TabPanel, Tabs, useToast,
 } from "@fw/ui";
-import { PlanSequence, copyText } from "../rotation";
+import { PlanSequence } from "../rotation/PlanSequence";
+import { copyText } from "../rotation/exportUtils";
 import { useMoenData } from "../rotation/moenStore";
 import {
-  DEFAULT_SCENARIO_INPUTS, SCENARIO_LIMITS, SCENARIO_PRESETS, clampScenarioInputs, formatScenarioSummary, matchPreset, runScenario,
+  DEFAULT_SCENARIO_INPUTS, SCENARIO_LIMITS, SCENARIO_PRESETS, clampScenarioInputs, describeClimateSource, formatScenarioSummary, matchPreset, runScenario,
 } from "../../logic/agronomy";
 import type { DetailedScenarioResult, PlanId, ScenarioPreset, ScenarioPresetId } from "../../logic/agronomy/types";
 import { AssumptionsDrawer } from "./AssumptionsDrawer";
@@ -30,7 +31,6 @@ function presetById(id: ScenarioPresetId): ScenarioPreset {
 export function ScenarioPage() {
   const { farm, climate, climateStatus, climateError, retryClimate, soil, evaluation, activePlanId, setActivePlanId, scenario, setScenario } = useMoenData();
   const toast = useToast();
-  const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const matched = matchPreset(scenario);
   const [lastPreset, setLastPreset] = useState<ScenarioPresetId>(matched ?? "typical");
@@ -62,7 +62,7 @@ export function ScenarioPage() {
         <h1>Scenario Studio</h1>
         <EmptyState title="No farm set up yet"
           body="Scenario Studio needs your farm’s crops, location and irrigation before it can estimate anything."
-          action={<Button variant="primary" onClick={() => navigate("/onboarding")}>Set up your farm</Button>} />
+          action={<Link to="/onboarding" className="scn-action scn-link scn-link--primary">Set up your farm</Link>} />
       </div>
     );
   }
@@ -112,12 +112,15 @@ export function ScenarioPage() {
           <h1>Scenario Studio</h1>
           <p className="scn-explainer">
             Explore what-if estimates for your rotation under different rainfall, temperature, irrigation and cost conditions.
-            These are <strong>what-if estimates, not forecasts or guaranteed income</strong>: they come from a simple model built on
-            {climateReady ? " historical NASA climate data (offline snapshot)," : " typical crop figures without climate data (climate is unavailable right now),"} {soil?.source === "USER_SOIL_TEST" ? "your soil test" : "simulated soil readings"} and typical crop costs and prices.
+            These are <strong>what-if estimates, not forecasts or guaranteed income</strong>: they come from a simple model using
+            {soil?.source === "USER_SOIL_TEST" ? " your soil test" : " simulated soil readings"} and typical crop costs and prices.{" "}
+            <span data-testid="scn-climate-source">
+              {climateStatus === "loading" ? "Loading climate data…" : describeClimateSource(result?.provenance?.climate ?? null)}
+            </span>
           </p>
         </div>
         <div className="scn-actions" role="group" aria-label="Scenario actions">
-          <Button variant="ghost" className="scn-action" onClick={() => navigate("/rotation")}>← Back to Rotation Planner</Button>
+          <Link to="/rotation" className="scn-action scn-link">← Back to Rotation Planner</Link>
           <Button className="scn-action" onClick={() => setDrawerOpen(true)}>Assumptions</Button>
           <Button className="scn-action" onClick={reset} disabled={atDefault} aria-describedby={atDefault ? "scn-reset-hint" : undefined}>Reset</Button>
           <Button className="scn-action" onClick={copy} disabled={!result}>Copy summary</Button>
@@ -248,7 +251,7 @@ export function ScenarioPage() {
       </div>
 
       <AssumptionsDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} result={result} planTitle={planTitle} climateAvailable={climateReady && !!climate}
-        sources={climateReady && climate ? climate.evidence.filter((e) => e.url).map((e) => ({ title: `NASA POWER: ${e.title}`, url: e.url as string, period: e.period })) : []} />
+        sources={climateReady && climate ? climate.evidence.filter((e) => e.url).map((e) => ({ title: e.title, url: e.url as string, period: e.period, source: e.source })) : []} />
     </div>
   );
 }

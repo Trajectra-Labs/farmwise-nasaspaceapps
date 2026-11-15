@@ -113,3 +113,8 @@
 .scn-muted { color: var(--fw-text-2); }
 .scn-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .scn-reset-hint { margin: 0; font-size: 13px; color: var(--fw-text-2); flex-basis: 100%; }
+.scn-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 var(--fw-s3);
+  border-radius: var(--fw-radius-control); color: var(--fw-blue); font-weight: 560; text-decoration: none; }
+.scn-link:hover { background: var(--fw-elevated); text-decoration: underline; }
+.scn-link--primary { background: var(--fw-blue); color: var(--fw-on-blue); padding: 0 var(--fw-s4); }
+.scn-link--primary:hover { background: var(--fw-blue); }

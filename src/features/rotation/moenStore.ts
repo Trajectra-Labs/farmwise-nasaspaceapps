@@ -31,6 +31,8 @@ export function useMoenData(): MoenData {
   const { state, actions } = useFarmWise();
   const farm = state.farm;
   const [climate, setClimate] = useState<ClimateContext | null>(null);
+  /** Which coordinates the stored climate belongs to (REV-20). */
+  const [climateKey, setClimateKey] = useState<string | null>(null);
   const [climateStatus, setClimateStatus] = useState<ClimateStatus>("loading");
   const [climateError, setClimateError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -48,7 +50,7 @@ export function useMoenData(): MoenData {
     setClimateError(null);
     Promise.resolve()
       .then(() => getClimateContext(farmRef.current))
-      .then((c) => { if (alive) { setClimate(c); setClimateStatus("ready"); } })
+      .then((c) => { if (alive) { setClimate(c); setClimateKey(`${lat},${lon}`); setClimateStatus("ready"); } })
       .catch((e: unknown) => {
         if (!alive) return;
         setClimate(null);
@@ -63,16 +65,21 @@ export function useMoenData(): MoenData {
     try { return getSimulatedReading(state.soilPreset); } catch { return null; }
   }, [farm?.knownSoil, state.soilPreset]);
 
+  // Climate fetched for other coordinates is stale: never evaluate with it; show "loading" until the refetch lands.
+  const stale = climate != null && climateKey !== `${lat},${lon}`;
+  const usableClimate = stale || climateStatus === "error" ? null : climate;
+  const exposedStatus: ClimateStatus = stale && climateStatus !== "error" ? "loading" : climateStatus;
+
   // Evaluate even while climate is loading/failed: the model degrades to "missing info" + lower confidence.
   // While refetching, the last good climate is still used (it is cleared only on error).
   const evaluation = useMemo(
-    () => (farm ? evaluateRotations(farm, climateStatus === "error" ? null : climate, soil) : null),
-    [farm, climate, climateStatus, soil],
+    () => (farm ? evaluateRotations(farm, usableClimate, soil) : null),
+    [farm, usableClimate, soil],
   );
 
   const retryClimate = useCallback(() => setAttempt((a) => a + 1), []);
   return {
-    state, farm, climate, climateStatus, climateError, retryClimate, soil, evaluation,
+    state, farm, climate: usableClimate, climateStatus: exposedStatus, climateError, retryClimate, soil, evaluation,
     activePlanId: state.activePlanId, setActivePlanId: actions.setActivePlanId,
     scenario: state.scenario, setScenario: actions.setScenario,
   };

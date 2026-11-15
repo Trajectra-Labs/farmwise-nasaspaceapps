@@ -101,7 +101,7 @@ test.describe("Scenario Studio · e2e", () => {
     await page.keyboard.press("ArrowRight");
     const rain = await slider(page, "Rainfall change").inputValue();
     const cost = await slider(page, "Input cost change").inputValue();
-    await page.getByRole("button", { name: /Back to Rotation Planner/ }).click();
+    await page.getByRole("link", { name: /Back to Rotation Planner/ }).click();
     await expect(page).toHaveURL(/\/rotation$/);
     await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Scenario Studio" }).click();
     await expect(page).toHaveURL(/\/scenarios$/);

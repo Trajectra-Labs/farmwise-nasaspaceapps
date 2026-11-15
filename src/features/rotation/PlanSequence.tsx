@@ -1,6 +1,7 @@
 import type { CropSeason } from "@fw/contracts";
 import { cropLabel, sameCrop } from "./logicBridge";
 import { yearSeason } from "./format";
+import "./PlanSequence.css";
 
 /** Crop-by-season sequence as an ordered list of chips (season + year, crop name). */
 /** changedFrom: the farmer's current seasons; seasons whose crop differs are marked "(changed)". */

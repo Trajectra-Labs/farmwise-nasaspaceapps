@@ -33,8 +33,8 @@ describe("Rotation Planner", () => {
     expect(screen.getByRole("radiogroup", { name: /choose a rotation plan/i })).toBeInTheDocument();
     await user.click(radioFor("minimum"));
     expect(radioFor("minimum")).toHaveAttribute("aria-checked", "true");
-    expect(card("minimum")).toHaveClass("fw-card--selected");
-    expect(card("current")).not.toHaveClass("fw-card--selected");
+    expect(radioFor("current")).toHaveAttribute("aria-checked", "false");
+    expect(within(card("minimum")).getByText("Selected", { selector: "span:not([id])" })).toBeInTheDocument();
     expect(screen.getByTestId("probe-active")).toHaveTextContent("minimum");
     const details = screen.getByTestId("plan-details");
     expect(within(details).getByRole("heading", { level: 2 })).toHaveTextContent(/Details:/);
@@ -57,7 +57,7 @@ describe("Rotation Planner", () => {
     const trigger = screen.getByRole("button", { name: "Compare all" });
     await user.click(trigger);
     const dialog = screen.getByRole("dialog", { name: /compare all plans/i });
-    expect(dialog).toHaveClass("fw-dialog--xl");
+    expect(dialog).toHaveAttribute("aria-modal", "true");
     const table = within(dialog).getByRole("table");
     expect(within(table).getAllByRole("columnheader")).toHaveLength(4);
     for (const label of ["Crop sequence", "Feasible", "Change size", "Score", "Confidence", "Recommended", "Budget fit (per season)"]) {
@@ -83,7 +83,8 @@ describe("Rotation Planner", () => {
     const trigger = within(card("resilience")).getByRole("button", { name: /why this plan/i });
     await user.click(trigger);
     const drawer = screen.getByRole("dialog", { name: /why this plan/i });
-    expect(drawer).toHaveClass("fw-drawer");
+    expect(drawer).toHaveAttribute("aria-modal", "true");
+    expect(drawer).toHaveAccessibleName(/Why this plan\? Resilience/i);
     for (const h of [/reasons/i, /^risks$/i, /unknowns/i, /all evidence used/i, /score versus confidence/i]) {
       expect(within(drawer).getByRole("heading", { name: h })).toBeInTheDocument();
     }
@@ -207,9 +208,9 @@ describe("Rotation Planner", () => {
     const { user } = renderRotation();
     await waitForPlans();
     const title = within(card("minimum")).getByRole("heading", { level: 3 }).textContent ?? "";
-    expect(radioFor("minimum")).toHaveAccessibleName(title);
+    expect(radioFor("minimum")).toHaveAccessibleName(`Select this plan ${title}`);
     await user.click(radioFor("minimum"));
-    expect(radioFor("minimum")).toHaveAccessibleName(title);
+    expect(radioFor("minimum")).toHaveAccessibleName(`Selected ${title}`);
     expect(radioFor("minimum")).toHaveAttribute("aria-checked", "true");
   });
 

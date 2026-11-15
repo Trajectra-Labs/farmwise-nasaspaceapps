@@ -23,7 +23,8 @@ describe("formatters", () => {
   });
   it("shared formatter set (REV-4)", () => {
     expect(formatKesRange({ low: 330000, high: 560000 })).toBe("KES 330,000 \u2013 560,000");
-    expect(formatKesRange({ low: -116000, high: 1010000 })).toBe("KES \u2212116,000 \u2013 1,010,000");
+    expect(formatKesRange({ low: -260000, high: 1332000 })).toBe("\u2212KES 260,000 to KES 1,332,000");
+    expect(formatKesRange({ low: -500000, high: -20000 })).toBe("\u2212KES 500,000 to \u2212KES 20,000");
     expect(formatKesRange({ low: 5000, high: 5000 })).toBe("KES 5,000");
     expect(formatKesRange(null)).toBe("Unknown");
     expect(formatSignedKes(1000)).toBe("+KES 1,000");

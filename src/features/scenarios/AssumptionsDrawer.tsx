@@ -1,9 +1,10 @@
 // Moen · Assumptions drawer (S08): the rules and formulas runScenario() actually used.
+import type { SourceKind } from "@fw/contracts";
 import { Button, Drawer, SourceBadge } from "@fw/ui";
 import type { DetailedScenarioResult } from "../../logic/agronomy/types";
 import { SCENARIO_FORMULAS } from "./formulas";
 
-export type DrawerSource = { title: string; url: string; period?: string };
+export type DrawerSource = { title: string; url: string; period?: string; source: SourceKind };
 
 export function AssumptionsDrawer({ open, onClose, result, planTitle, sources, climateAvailable }: {
   open: boolean; onClose: () => void; result: DetailedScenarioResult | null; planTitle: string; sources: DrawerSource[]; climateAvailable: boolean;
@@ -37,7 +38,7 @@ export function AssumptionsDrawer({ open, onClose, result, planTitle, sources, c
               {sources.map((src) => (
                 <li key={src.url + src.title}>
                   <a href={src.url} target="_blank" rel="noreferrer">{src.title}</a>
-                  {src.period ? <span className="scn-muted"> · {src.period}</span> : null} <SourceBadge source="NASA_OFFLINE_SNAPSHOT" />
+                  {src.period ? <span className="scn-muted"> · {src.period}</span> : null} <SourceBadge source={src.source} />
                 </li>
               ))}
             </ul>

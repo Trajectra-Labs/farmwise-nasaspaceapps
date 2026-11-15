@@ -19,6 +19,7 @@ export type PlanCardProps = {
 
 export function PlanCard({ plan, selected, recommended, tabbable, currentSeasons, hasBudget, onSelect, onWhy }: PlanCardProps) {
   const titleId = `rot-plan-${plan.id}-title`;
+  const btnTextId = `rot-plan-${plan.id}-select`;
   return (
     <Card selected={selected} className="rot-card" aria-labelledby={titleId} data-plan-id={plan.id} data-testid={`plan-card-${plan.id}`}>
       <div className="rot-card__head">
@@ -78,12 +79,12 @@ export function PlanCard({ plan, selected, recommended, tabbable, currentSeasons
           variant={selected ? "primary" : "secondary"}
           role="radio"
           aria-checked={selected}
-          aria-labelledby={titleId}
+          aria-labelledby={`${btnTextId} ${titleId}`}
           tabIndex={tabbable ? 0 : -1}
           onClick={onSelect}
           data-radio-id={plan.id}
         >
-          {selected ? "Selected" : "Select this plan"}
+          <span id={btnTextId}>{selected ? "Selected" : "Select this plan"}</span>
         </Button>
         <Button variant="ghost" onClick={onWhy} aria-haspopup="dialog" aria-label={`Why this plan? ${plan.title}`}>Why this plan?</Button>
       </div>

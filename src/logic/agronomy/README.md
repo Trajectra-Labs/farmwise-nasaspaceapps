@@ -148,7 +148,7 @@ Inputs are clamped/snapped to `SCENARIO_LIMITS` (rain −50…+30 % step 5; temp
 | Function | Example |
 |---|---|
 | `formatKes(n)` | `KES 120,000`; negative `−KES 20,000` (U+2212); null/NaN `Unknown` |
-| `formatKesRange(r)` | `KES 330,000 – 560,000` (currency once, en dash); equal ends `KES 5,000`; null `Unknown` |
+| `formatKesRange(r)` | `KES 330,000 – 560,000` (currency once, en dash); any negative end: `−KES 260,000 to KES 1,332,000`, `−KES 500,000 to −KES 20,000`; equal ends `KES 5,000`; null `Unknown` |
 | `formatSignedKes(n)` | `+KES 1,000` / `−KES 1,000` / `KES 0` |
 | `formatNumber(n, maxFractionDigits = 0)` | `1,631`; `formatNumber(16.64, 1)` → `16.6`; negatives use U+2212 |
 | `formatMm(n)` | `1,631 mm` |
