@@ -8,22 +8,14 @@ import {
   LineChart,
   ResponsiveContainer,
   Tooltip,
-  type TooltipContentProps,
   XAxis,
   YAxis,
 } from 'recharts'
 import type { NormalizedClimate } from '../../data/nasa/normalize'
 import { Badge, Button } from '../../ui'
+import { AXIS, GRID, INITIAL, makeTooltip, S1, S2, S3, type Row } from './chartKit'
 import { formatDate, formatNumber, formatPeriod, UNKNOWN } from './format'
 
-const AXIS = { fontSize: 12, fill: 'var(--color-text-2)' } as const
-const GRID = 'var(--color-border)'
-const S1 = 'var(--color-accent)'
-const S2 = 'var(--fm-series-2)'
-const S3 = 'var(--fm-series-3)'
-const INITIAL = { width: 640, height: 280 }
-
-type Row = { key: string; cells: (string | null)[] }
 
 type ChartCardProps = {
   title: string
@@ -33,11 +25,13 @@ type ChartCardProps = {
   columns: string[]
   rows: Row[]
   tableCaption: string
+  /** Text legend shown under the plot. */
+  legend?: ReactNode
   children: ReactNode
 }
 
 /** Local ChartFrame-style wrapper: title, provenance badge, plot, summary, caption and a data table toggle. */
-function ChartCard({ title, badgeLabel, caption, summary, columns, rows, tableCaption, children }: ChartCardProps) {
+export function ChartCard({ title, badgeLabel, caption, summary, columns, rows, tableCaption, legend, children }: ChartCardProps) {
   const id = useId()
   const [open, setOpen] = useState(false)
   return (
@@ -51,6 +45,7 @@ function ChartCard({ title, badgeLabel, caption, summary, columns, rows, tableCa
       <div className="ev-chart__plot" role="img" aria-label={title} aria-describedby={`${id}-s`}>
         {children}
       </div>
+      {legend}
       <p id={`${id}-s`} className="ev-chart__summary">
         <strong>Summary: </strong>
         {summary}
@@ -110,31 +105,17 @@ function ChartCard({ title, badgeLabel, caption, summary, columns, rows, tableCa
   )
 }
 
-function makeTooltip(unit: string, digits: number, badgeLabel: string, labelFor: (l: string) => string) {
-  return function ChartTooltip({ active, payload, label }: TooltipContentProps<number | string | readonly (number | string)[], string | number>) {
-    if (!active || !payload || payload.length === 0) return null
-    return (
-      <div className="ev-tooltip">
-        <p>
-          <strong>{labelFor(String(label))}</strong>
-        </p>
-        {payload.map((p) => (
-          <p key={String(p.name)}>
-            {p.name}: {typeof p.value === 'number' ? `${formatNumber(p.value, digits)} ${unit}` : UNKNOWN}
-          </p>
-        ))}
-        <p className="ev-unknown">{badgeLabel}</p>
-      </div>
-    )
-  }
-}
-
 const monthLabel = (climate: NormalizedClimate) => (key: string) =>
   climate.monthly.find((p) => p.key === key)?.label ?? key
 
-export type ClimateChartsProps = { climate: NormalizedClimate; retrievedAt: string }
+export type ClimateChartsProps = {
+  climate: NormalizedClimate
+  retrievedAt: string
+  /** 'rain' = monthly and annual rainfall (every year). 'temperature' = monthly temperature. */
+  view: 'rain' | 'temperature'
+}
 
-export function ClimateCharts({ climate, retrievedAt }: ClimateChartsProps) {
+export function ClimateCharts({ climate, retrievedAt, view }: ClimateChartsProps) {
   const badgeLabel = `NASA snapshot \u00b7 ${formatDate(retrievedAt)}`
   const period = formatPeriod(climate.firstYear, climate.lastYear)
   const source = `NASA POWER monthly data, ${period}, offline snapshot retrieved ${formatDate(retrievedAt)}`
@@ -188,6 +169,8 @@ export function ClimateCharts({ climate, retrievedAt }: ClimateChartsProps) {
 
   return (
     <div>
+      {view === 'rain' ? (
+        <>
       <ChartCard
         title="Monthly rainfall"
         badgeLabel={badgeLabel}
@@ -208,6 +191,9 @@ export function ClimateCharts({ climate, retrievedAt }: ClimateChartsProps) {
         </ResponsiveContainer>
       </ChartCard>
 
+        </>
+      ) : null}
+      {view === 'temperature' ? (
       <ChartCard
         title="Monthly temperature"
         badgeLabel={badgeLabel}
@@ -234,6 +220,8 @@ export function ClimateCharts({ climate, retrievedAt }: ClimateChartsProps) {
         </ResponsiveContainer>
       </ChartCard>
 
+      ) : null}
+      {view === 'rain' ? (
       <ChartCard
         title="Annual rainfall"
         badgeLabel={badgeLabel}
@@ -253,6 +241,7 @@ export function ClimateCharts({ climate, retrievedAt }: ClimateChartsProps) {
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
+      ) : null}
     </div>
   )
 }

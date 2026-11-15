@@ -31,21 +31,33 @@ function cardFor(name: string): HTMLElement {
 }
 
 describe('EvidencePage structure', () => {
-  it('has one h1 "Data & Evidence" and the required sections', () => {
+  it('has one h1 "Data & Evidence" with a "Your climate, {farm}" title and the required sections', () => {
     render(<EvidencePage />)
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1, name: 'Data & Evidence' })).toBeInTheDocument()
-    for (const name of ['Data sources', 'Climate history', 'Key figures', 'How to read this', 'Limitations']) {
+    expect(screen.getByText('Your climate, Nakuru demo farm, Kenya', { selector: 'p' })).toBeInTheDocument()
+    for (const name of ['What this means for your farm', 'Where FarmWise uses this', 'A typical year', 'Details and sources']) {
       expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument()
     }
   })
 
-  it('orders sections: figures, charts, NASA POWER, field sensors, unused datasets, how to read, limits', () => {
+  it('states in the header that the numbers are historical, regional and not a forecast', () => {
+    render(<EvidencePage />)
+    const h1 = screen.getByRole('heading', { level: 1 })
+    const header = h1.closest('header') as HTMLElement
+    expect(within(header).getByText('NASA offline snapshot')).toBeInTheDocument()
+    expect(header).toHaveTextContent(/NASA POWER monthly data, 2014\u20132023\. Snapshot retrieved \d{1,2} [A-Z][a-z]{2} \d{4}/)
+    expect(header).toHaveTextContent(/regional average, not a forecast and not a measurement from your field/)
+  })
+
+  it('orders sections: findings, uses, typical year, details and the five reference sections', () => {
     render(<EvidencePage />)
     const names = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
     expect(names).toEqual([
-      'Key figures',
-      'Climate history',
+      'What this means for your farm',
+      'Where FarmWise uses this',
+      'A typical year',
+      'Details and sources',
       'Data sources',
       'Field sensors',
       'Other NASA datasets: not used',
@@ -58,11 +70,81 @@ describe('EvidencePage structure', () => {
     render(<EvidencePage />)
     const nav = screen.getByRole('navigation', { name: 'On this page' })
     const links = within(nav).getAllByRole('link')
-    expect(links).toHaveLength(7)
+    expect(links).toHaveLength(9)
     for (const a of links) {
       const id = a.getAttribute('href')?.replace('#', '') ?? ''
       expect(document.getElementById(id)).not.toBeNull()
     }
+  })
+
+  it('keeps reference sections in closed disclosures, each with a summary label', () => {
+    render(<EvidencePage />)
+    const details = Array.from(document.querySelectorAll('details'))
+    expect(details.map((d) => d.querySelector('summary')?.textContent)).toEqual([
+      'Data sources',
+      'Field sensors',
+      'Other NASA datasets: not used',
+      'How to read this',
+      'Limitations',
+    ])
+    for (const d of details) expect(d.open).toBe(false)
+  })
+})
+
+describe('summary strip', () => {
+  it('shows four figures from the snapshot with units', () => {
+    render(<EvidencePage />)
+    const strip = screen.getByRole('region', { name: 'Summary' })
+    const get = (label: string) => within(strip).getByText(label).closest('div') as HTMLElement
+    expect(get('Mean annual rain')).toHaveTextContent(/\d,\d{3} mm/)
+    expect(get('Mean annual rain')).toHaveTextContent('Mean of 10 complete years')
+    expect(get('Driest to wettest year')).toHaveTextContent('914\u20132,164 mm')
+    expect(get('Driest to wettest year')).toHaveTextContent('2014 driest, 2020 wettest')
+    expect(get('Rainy seasons')).toHaveTextContent(/^Rainy seasons2/)
+    expect(get('Rainy seasons')).toHaveTextContent('long rains Mar\u2013May, short rains Sep\u2013Dec')
+    expect(get('Mean temperature')).toHaveTextContent(/\d+\.\d \u00b0C/)
+    expect(strip).toHaveTextContent('NASA POWER snapshot, 2014\u20132023, regional grid average')
+  })
+
+  it('shows Not available rather than a number when there is no data', () => {
+    render(<EvidencePage climate={normalizePower({})} />)
+    const strip = screen.getByRole('region', { name: 'Summary' })
+    expect(within(strip).getAllByText('Not available')).toHaveLength(4)
+    expect(strip.textContent).not.toMatch(/\b0\b/)
+  })
+})
+
+describe('insights', () => {
+  it('shows a card per finding with the calculated numbers, a source caption and a link to the screen that uses it', () => {
+    render(<EvidencePage />)
+    const section = screen.getByRole('heading', { level: 2, name: 'What this means for your farm' }).closest('section') as HTMLElement
+    const cards = within(section).getAllByRole('heading', { level: 3 })
+    expect(cards).toHaveLength(4)
+    const text = section.textContent ?? ''
+    for (const s of ['April', '9 of 10', 'March', '3 of 10', '914 mm', '2,164 mm', '25%', 'under 29 \u00b0C', 'about 4.5 \u00b0C']) expect(text).toContain(s)
+    expect(within(section).getAllByText('Calculated from NASA snapshot')).toHaveLength(4)
+    const links = within(section).getAllByRole('link')
+    expect(links.map((a) => [a.textContent, a.getAttribute('href')])).toEqual([
+      ['Used in Rotation Planner', '/rotation'],
+      ['Used in Rotation Planner', '/rotation'],
+      ['Used in Scenario Studio', '/scenarios'],
+      ['Used in Rotation Planner', '/rotation'],
+    ])
+  })
+
+  it('shows an empty state, not a guess, when the snapshot has no data', () => {
+    render(<EvidencePage climate={normalizePower({})} />)
+    expect(screen.getByText('No findings to show')).toBeInTheDocument()
+  })
+
+  it('lists where FarmWise uses the climate data', () => {
+    render(<EvidencePage />)
+    const section = screen.getByRole('heading', { level: 2, name: 'Where FarmWise uses this' }).closest('section') as HTMLElement
+    expect(within(section).getAllByRole('link').map((a) => [a.textContent, a.getAttribute('href')])).toEqual([
+      ['Rotation Planner', '/rotation'],
+      ['Scenario Studio', '/scenarios'],
+      ['Dashboard', '/'],
+    ])
   })
 })
 
@@ -82,7 +164,7 @@ describe('source cards (E01, E03)', () => {
   it('lists SMAP, GPM IMERG, MODIS, Landsat and ECOSTRESS in one compact card, each Not used, with no values', () => {
     render(<EvidencePage />)
     expect(UNUSED_SOURCES.map((s) => s.name)).toEqual(['SMAP', 'GPM IMERG', 'MODIS', 'Landsat', 'ECOSTRESS'])
-    const section = screen.getByRole('heading', { level: 2, name: 'Other NASA datasets: not used' }).closest('section') as HTMLElement
+    const section = screen.getByRole('heading', { level: 2, name: 'Other NASA datasets: not used' }).closest('details') as HTMLElement
     const rows = within(section).getAllByRole('listitem')
     expect(rows).toHaveLength(5)
     UNUSED_SOURCES.forEach((s, i) => {
@@ -141,27 +223,104 @@ describe('source links (E04)', () => {
   })
 })
 
-describe('climate charts (E02, E07, E08)', () => {
-  it('shows three charts with the snapshot badge, unit axes captions and data table toggles', async () => {
+async function openTab(name: string) {
+  await userEvent.click(screen.getByRole('tab', { name }))
+}
+
+describe('climate tabs', () => {
+  it('uses ARIA tabs with roving tabindex and arrow-key navigation', async () => {
     render(<EvidencePage />)
-    for (const title of ['Monthly rainfall', 'Monthly temperature', 'Annual rainfall']) {
+    const tabs = screen.getAllByRole('tab')
+    expect(tabs.map((t) => t.textContent)).toEqual(['Typical year', 'Every year', 'Temperature'])
+    expect(screen.getByRole('tablist', { name: 'Climate charts' })).toBeInTheDocument()
+    expect(tabs.map((t) => t.getAttribute('tabindex'))).toEqual(['0', '-1', '-1'])
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+    const panel = screen.getByRole('tabpanel')
+    expect(panel).toHaveAttribute('aria-labelledby', tabs[0]!.id)
+    expect(tabs[0]).toHaveAttribute('aria-controls', panel.id)
+
+    tabs[0]!.focus()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(tabs[1]).toHaveFocus()
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true')
+    expect(tabs.map((t) => t.getAttribute('tabindex'))).toEqual(['-1', '0', '-1'])
+    await userEvent.keyboard('{End}')
+    expect(tabs[2]).toHaveFocus()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(tabs[0]).toHaveFocus()
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(tabs[2]).toHaveFocus()
+    await userEvent.keyboard('{Home}')
+    expect(tabs[0]).toHaveFocus()
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1)
+  })
+})
+
+describe('season calendar (typical year tab)', () => {
+  it('is the default tab, with legend, summary and a 12-month data table by season', async () => {
+    render(<EvidencePage />)
+    const fig = screen.getByRole('heading', { level: 3, name: 'Typical year by season' }).closest('figure') as HTMLElement
+    expect(within(fig).getByText(/NASA snapshot \u00b7 \d{1,2} [A-Z][a-z]{2} \d{4}/)).toBeInTheDocument()
+    const legend = within(fig).getByRole('list', { name: 'Chart legend' })
+    expect(legend).toHaveTextContent('Long rains, Mar\u2013May')
+    expect(legend).toHaveTextContent('Short rains, Sep\u2013Dec')
+    expect(legend).toHaveTextContent('Wettest year')
+    expect(legend).toHaveTextContent('Driest year')
+    expect(fig).toHaveTextContent(/Summary:/)
+    expect(fig).toHaveTextContent(/not a forecast/)
+    await userEvent.click(within(fig).getByRole('button', { name: /Show data table/ }))
+    const table = screen.getByRole('table', { name: /Average, lowest and highest monthly rainfall/ })
+    expect(within(table).getAllByRole('row')).toHaveLength(13)
+    expect(within(table).getByRole('row', { name: /Apr/ })).toHaveTextContent('Long rains')
+    expect(within(table).getByRole('row', { name: /Nov/ })).toHaveTextContent('Short rains')
+    expect(within(table).getByRole('row', { name: /Jul/ })).toHaveTextContent('Below 100 mm on average')
+  })
+
+  it('shows unknown months as Unknown in the table, never 0', async () => {
+    const raw: PowerResponse = {
+      header: { fill_value: -999 },
+      parameters: { PRECTOTCORR: { units: 'mm/day' }, T2M: { units: 'C' } },
+      properties: { parameter: { PRECTOTCORR: { '202001': 1 }, T2M: {}, T2M_MAX: {}, T2M_MIN: {} } },
+    }
+    render(<EvidencePage climate={normalizePower(raw)} />)
+    await userEvent.click(screen.getByRole('button', { name: /Show data table/ }))
+    const table = screen.getByRole('table', { name: /Average, lowest and highest monthly rainfall/ })
+    const feb = within(table).getByRole('row', { name: /Feb/ })
+    expect(within(feb).getAllByText('Unknown')).toHaveLength(3)
+  })
+})
+
+describe('climate charts (E02, E07, E08)', () => {
+  it('shows the rainfall charts on Every year and temperature on Temperature, each with badge, summary and data table toggle', async () => {
+    render(<EvidencePage />)
+    await openTab('Every year')
+    for (const title of ['Monthly rainfall', 'Annual rainfall']) {
       const fig = screen.getByRole('heading', { level: 3, name: title }).closest('figure') as HTMLElement
       expect(within(fig).getByText(/NASA snapshot \u00b7 \d{1,2} [A-Z][a-z]{2} \d{4}/)).toBeInTheDocument()
       expect(fig).toHaveTextContent(/Summary:/)
       expect(fig).toHaveTextContent('2014\u20132023')
     }
+    expect(screen.queryByRole('heading', { level: 3, name: 'Monthly temperature' })).not.toBeInTheDocument()
     const toggles = screen.getAllByRole('button', { name: /Show data table/ })
-    expect(toggles).toHaveLength(3)
+    expect(toggles).toHaveLength(2)
     await userEvent.click(toggles[0]!)
     const table = screen.getByRole('table', { name: /Monthly rainfall from NASA POWER/ })
     expect(within(table).getAllByRole('row')).toHaveLength(121)
     expect(within(table).getByRole('columnheader', { name: 'Rainfall (mm)' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Hide data table/ })).toHaveAttribute('aria-expanded', 'true')
+
+    await openTab('Temperature')
+    const fig = screen.getByRole('heading', { level: 3, name: 'Monthly temperature' }).closest('figure') as HTMLElement
+    expect(fig).toHaveTextContent(/Summary:/)
+    expect(within(fig).getByText(/NASA snapshot/)).toBeInTheDocument()
+    await userEvent.click(within(fig).getByRole('button', { name: /Show data table/ }))
+    expect(within(screen.getByRole('table', { name: /Monthly air temperature at 2 m/ })).getAllByRole('row')).toHaveLength(121)
   })
 
   it('renders the annual table with 10 complete years', async () => {
     render(<EvidencePage />)
-    await userEvent.click(screen.getAllByRole('button', { name: /Show data table/ })[2]!)
+    await openTab('Every year')
+    await userEvent.click(screen.getAllByRole('button', { name: /Show data table/ })[1]!)
     const table = screen.getByRole('table', { name: /Annual rainfall totals/ })
     expect(within(table).getAllByRole('row')).toHaveLength(11)
   })
@@ -180,13 +339,14 @@ describe('climate charts (E02, E07, E08)', () => {
       },
     }
     render(<EvidencePage climate={normalizePower(raw)} />)
+    await openTab('Every year')
     const buttons = screen.getAllByRole('button', { name: /Show data table/ })
     await userEvent.click(buttons[0]!)
     const rain = screen.getByRole('table', { name: /Monthly rainfall/ })
     const jan = within(rain).getByRole('row', { name: /Jan 2020/ })
     expect(jan).toHaveTextContent('Unknown')
     expect(jan).not.toHaveTextContent(/\b0\b/)
-    await userEvent.click(buttons[2]!)
+    await userEvent.click(buttons[1]!)
     const annual = screen.getByRole('table', { name: /Annual rainfall totals/ })
     expect(within(annual).getByRole('row', { name: /2020/ })).toHaveTextContent('Unknown')
     expect(screen.getAllByText(/No complete year/).length).toBeGreaterThan(0)
@@ -195,26 +355,8 @@ describe('climate charts (E02, E07, E08)', () => {
   it('shows an empty state when the snapshot has no data', () => {
     render(<EvidencePage climate={normalizePower({})} />)
     expect(screen.getByText('No climate data in the snapshot')).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Show data table/ })).not.toBeInTheDocument()
-  })
-})
-
-describe('key figures', () => {
-  it('shows rainfall, temperature and wettest/driest month with provenance and period', () => {
-    render(<EvidencePage />)
-    const rain = cardFor('Mean annual rainfall')
-    expect(rain).toHaveTextContent(/\d[\d,]* mm per year/)
-    expect(rain).toHaveTextContent('NASA offline snapshot')
-    expect(rain).toHaveTextContent('10 complete years')
-    expect(cardFor('Mean air temperature')).toHaveTextContent(/\d+\.\d \u00b0C/)
-    expect(cardFor('Wettest month on average')).toHaveTextContent(/April|May|March|November|December/)
-    expect(cardFor('Driest month on average')).toHaveTextContent('2014\u20132023')
-  })
-
-  it('shows Unknown rather than a number when there is no data', () => {
-    render(<EvidencePage climate={normalizePower({})} />)
-    expect(cardFor('Mean annual rainfall')).toHaveTextContent('Unknown')
-    expect(cardFor('Mean air temperature')).toHaveTextContent('Unknown')
   })
 })
 

@@ -401,3 +401,333 @@
     color: var(--color-text-2);
   }
 }
+
+/* Header */
+.ev-header {
+  margin-bottom: var(--space-5);
+}
+
+.ev-eyebrow {
+  margin: 0 0 var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+
+.ev-title {
+  margin: 0;
+  font-size: var(--font-h1);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.ev-period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-2) 0 var(--space-3);
+  color: var(--color-text-2);
+}
+
+/* Summary strip: numbers first */
+.ev-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 0;
+  margin: 0 0 var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.ev-stat {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  min-width: 0;
+}
+
+.ev-stat:first-child {
+  border-top: 0;
+}
+
+@media (min-width: 600px) {
+  .ev-stat {
+    border-top: 0;
+    border-left: 1px solid var(--color-border);
+  }
+  .ev-stat:first-child {
+    border-left: 0;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  /* Two columns: the second row needs a top rule and the third item no left rule. */
+  .ev-stat:nth-child(n + 3) {
+    border-top: 1px solid var(--color-border);
+  }
+  .ev-stat:nth-child(odd) {
+    border-left: 0;
+  }
+}
+
+.ev-stat dt {
+  font-size: var(--font-caption);
+  font-weight: 600;
+  color: var(--color-text-2);
+  margin: 0 0 var(--space-1);
+}
+
+.ev-stat dd {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ev-stat__value {
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.ev-stat__value .ev-unit {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.ev-stat__value--unknown {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.ev-stat__detail {
+  font-size: var(--font-caption);
+  color: var(--color-text-2);
+}
+
+/* Insight cards */
+.ev-insight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ev-insight .fw-card__title {
+  padding-right: calc(var(--space-6) + var(--space-2));
+  margin: 0;
+}
+
+.ev-insight__icon {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-control);
+  background: var(--color-elevated);
+  color: var(--color-accent);
+}
+
+@media (max-width: 599px) {
+  .ev-insight__icon {
+    top: var(--space-4);
+    right: var(--space-4);
+  }
+}
+
+.ev-insight__body {
+  margin: 0;
+  max-width: 70ch;
+}
+
+.ev-insight__link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-top: auto;
+}
+
+/* Where FarmWise uses this */
+.ev-uses {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.ev-uses li {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 0 var(--space-4);
+  padding: 0 var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.ev-uses li:first-child {
+  border-top: 0;
+}
+
+.ev-uses a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  min-width: 10rem;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.ev-uses span {
+  color: var(--color-text-2);
+  padding-bottom: var(--space-2);
+}
+
+@media (min-width: 600px) {
+  .ev-uses li {
+    grid-template-columns: 10rem 1fr;
+  }
+
+  .ev-uses span {
+    padding-bottom: 0;
+  }
+}
+
+/* Tabs: segmented control */
+.ev-tabs__list {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  margin-bottom: var(--space-4);
+  background: var(--color-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.ev-tabs__tab {
+  flex: 1 1 0;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius-control) - var(--space-1));
+  background: transparent;
+  color: var(--color-text-2);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ev-tabs__tab[aria-selected='true'] {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-1);
+  color: var(--color-accent);
+}
+
+.ev-tabs__tab:hover {
+  color: var(--color-text);
+}
+
+.ev-tabs__tab[aria-selected='true']:hover {
+  color: var(--color-accent);
+}
+
+.ev-tabs__tab:focus-visible,
+.ev-tabs__panel:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Season legend */
+.ev-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  font-size: var(--font-caption);
+  color: var(--color-text-2);
+}
+
+.ev-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ev-chip {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: var(--space-1);
+  flex: none;
+}
+
+/* Reference sections in disclosures */
+.ev-disclosures {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ev-details {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.ev-details summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-4);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-card);
+}
+
+.ev-details summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.ev-details[open] > summary {
+  border-bottom: 1px solid var(--color-border);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.ev-details__body {
+  padding: var(--space-4);
+  scroll-margin-top: var(--space-5);
+}
+
+.ev-details__body .fw-card {
+  box-shadow: none;
+}
+
+.ev-details__body > :last-child {
+  margin-bottom: 0;
+}
+
+.ev-details__body > h2.ev-visually-hidden {
+  scroll-margin-top: var(--space-5);
+}

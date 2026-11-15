@@ -17,10 +17,10 @@ test.describe('/evidence specific checks', () => {
     await expect(skip).toBeFocused()
     await expect(skip).toBeVisible()
 
-    // Tab until the "Climate history" contents link is focused; every contents link must be reachable.
+    // Tab until the "A typical year" contents link is focused; every contents link must be reachable.
     const toc = page.getByRole('navigation', { name: 'On this page' })
     const labels = await toc.getByRole('link').allInnerTexts()
-    expect(labels).toContain('Climate history')
+    expect(labels).toContain('A typical year')
     const reached = new Set<string>()
     for (let i = 0; i < 40 && reached.size < labels.length; i++) {
       await page.keyboard.press('Tab')
@@ -30,7 +30,7 @@ test.describe('/evidence specific checks', () => {
       })
       if (t) {
         reached.add(t)
-        if (t === 'Climate history') {
+        if (t === 'A typical year') {
           // Focus ring: computed outline is not none.
           const ring = await page.evaluate(() => {
             const cs = getComputedStyle(document.activeElement as Element)
@@ -43,7 +43,7 @@ test.describe('/evidence specific checks', () => {
         }
       }
     }
-    expect(reached.has('Climate history')).toBe(true)
+    expect(reached.has('A typical year')).toBe(true)
     // Activating the link moves the hash and brings the section into view.
     await expect(page).toHaveURL(/#ev-climate$/)
     const box = await page.locator('#ev-climate').boundingBox()
@@ -95,6 +95,33 @@ test.describe('/evidence specific checks', () => {
     expect([...reached].sort()).toEqual([...labels].sort())
   })
 
+  test('X02 chart tabs work with arrow keys and keep a data table toggle', async ({ page }) => {
+    await waitForRoute(page, '/evidence')
+    const typical = page.getByRole('tab', { name: 'Typical year' })
+    await expect(typical).toHaveAttribute('aria-selected', 'true')
+    await typical.focus()
+    await page.keyboard.press('ArrowRight')
+    const every = page.getByRole('tab', { name: 'Every year' })
+    await expect(every).toBeFocused()
+    await expect(every).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByRole('heading', { level: 3, name: 'Monthly rainfall' })).toBeVisible()
+    await page.keyboard.press('ArrowRight')
+    await expect(page.getByRole('heading', { level: 3, name: 'Monthly temperature' })).toBeVisible()
+    await page.getByRole('button', { name: /show data table/i }).click()
+    await expect(page.locator('table.ev-table tbody tr').first()).toBeVisible()
+  })
+
+  test('X03 a contents link to a reference section opens its disclosure', async ({ page }) => {
+    await waitForRoute(page, '/evidence')
+    await expect(page.locator('details').first()).not.toHaveAttribute('open', '')
+    const toc = page.getByRole('navigation', { name: 'On this page' })
+    await toc.getByRole('link', { name: 'Limitations' }).click()
+    await expect(page).toHaveURL(/#ev-limits$/)
+    const limits = page.locator('details', { has: page.locator('#ev-limits') })
+    await expect(limits).toHaveAttribute('open', '')
+    await expect(limits.getByText('Known limits of this data')).toBeVisible()
+  })
+
   test('E04 external links: https, descriptive text, noopener on _blank', async ({ page }) => {
     await waitForRoute(page, '/evidence')
     const links = await page.locator('main a[href^="http"]').evaluateAll((as) =>
@@ -115,7 +142,7 @@ test.describe('/evidence specific checks', () => {
     }
   })
 
-  test('E09 offline: charts still render from the snapshot', async ({ page, context }) => {
+  test('E09 offline: charts still render from the snapshot, on every tab', async ({ page, context }) => {
     await waitForRoute(page, '/evidence')
     await context.setOffline(true)
     await page.evaluate(() => window.dispatchEvent(new Event('offline')))
@@ -123,10 +150,16 @@ test.describe('/evidence specific checks', () => {
     await page.getByRole('link', { name: 'My Farm', exact: true }).click()
     await expect(page.getByRole('heading', { level: 1, name: 'My Farm' })).toBeVisible()
     await page.getByRole('link', { name: 'Data & Evidence' }).click()
-    await expect(page.getByRole('heading', { level: 1, name: 'Data & Evidence' })).toBeVisible()
+    await expect(page.getByText(/^Your climate, /)).toBeVisible()
     await expect(page.locator('.recharts-surface').first()).toBeVisible()
-    expect(await page.locator('.recharts-surface').count()).toBeGreaterThanOrEqual(3)
     await expect(page.getByText(/NASA snapshot/i).first()).toBeVisible()
+    // The other chart tabs also render from the snapshot without a network.
+    await page.getByRole('tab', { name: 'Every year' }).click()
+    await expect(page.locator('.recharts-surface').first()).toBeVisible()
+    expect(await page.locator('.recharts-surface').count()).toBeGreaterThanOrEqual(2)
+    await page.getByRole('tab', { name: 'Temperature' }).click()
+    await expect(page.locator('.recharts-surface').first()).toBeVisible()
+    await page.getByRole('tab', { name: 'Typical year' }).click()
     // A data table still opens offline and holds real rows.
     await page.getByRole('button', { name: /show data table/i }).first().click()
     expect(await page.locator('table.ev-table tbody tr').count()).toBeGreaterThan(5)
