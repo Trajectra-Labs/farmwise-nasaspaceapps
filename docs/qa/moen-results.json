@@ -1,0 +1,41 @@
+{
+  "owner": "moen",
+  "workstream": "Crop rotations · Scoring · Scenario Studio",
+  "date": "2026-11-15",
+  "environment": { "node": "26.x", "os": "macOS (darwin)", "browser": "Google Chrome (playwright channel 'chrome')" },
+  "commands": [
+    { "command": "npm run typecheck", "status": "pass", "detail": "0 errors" },
+    { "command": "npm run lint", "status": "pass", "detail": "0 problems" },
+    { "command": "npx vitest run", "status": "pass", "passed": 141, "failed": 0, "files": 8 },
+    { "command": "npm run build", "status": "pass" },
+    { "command": "npx playwright test --project=e2e --project=a11y", "status": "pass", "passed": 30, "failed": 0 },
+    { "command": "npx playwright test --project=visual", "status": "pass", "passed": 51, "failed": 0, "detail": "compared against darwin baselines" }
+  ],
+  "tests": {
+    "pass": ["R01","R02","R03","R04","R05","R06","R07","R08","R09","R10","R11","R12","S01","S02","S03","S04","S05","S06","S07","S08","S09","S10","S11","S12","S13","S14"],
+    "fail": [],
+    "blocked": [],
+    "notes": { "S02": "pointer covered by track click, not drag" }
+  },
+  "review": {
+    "rounds": [
+      { "round": 1, "p0": 0, "p1": 2, "p2": 15, "status": "fixed" },
+      { "round": 2, "p0": 0, "p1": 0, "p2": 7, "status": "fixed" },
+      { "round": 3, "p0": 0, "p1": 0, "p2": 2, "status": "fixed" }
+    ]
+  },
+  "screenshots": { "dir": "docs/qa/screenshots/moen", "count": 44, "baselines": "tests/moen/*.visual.spec.ts-snapshots (darwin)" },
+  "exports": {
+    "src/features/rotation": ["RotationPage", "PlanSequence", "copyText", "downloadJson"],
+    "src/features/scenarios": ["ScenarioPage"],
+    "src/logic/agronomy": ["evaluateRotations", "runScenario", "SCENARIO_PRESETS", "SCENARIO_LIMITS", "DEFAULT_SCENARIO_INPUTS", "matchPreset", "clampScenarioInputs", "formatRotationSummary", "formatScenarioSummary", "rotationEvaluationToJSON", "formatKes", "formatKesRange", "formatSignedKes", "formatNumber", "formatMm", "CROPS"]
+  },
+  "sourceFixtureNote": "Climate from harness stand-in using a REAL NASA POWER monthly snapshot (Nakuru -0.30, 36.07, 2015-2024, request URL preserved). Soil = SIMULATED_IOT presets. Prices/costs/yields = labelled team assumptions.",
+  "unverified": [
+    "Bundled Playwright Chromium (install hangs on Node 26); installed Chrome used",
+    "Visual comparisons on non-darwin platforms (skipped until baselines committed)",
+    "Integration against real src/ui, src/core, Ted's NASA module and Abdullah's soil module (harness stand-ins used)",
+    "Loading-state screenshot (RTL only)",
+    "Agronomic validation by an agronomist"
+  ]
+}
