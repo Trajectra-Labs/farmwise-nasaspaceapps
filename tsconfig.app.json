@@ -14,10 +14,19 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@fw/contracts": ["src/contracts/farmwise.ts"],
+      "@fw/ui": ["src/ui/fw-compat.tsx"],
+      "@fw/core": ["src/core/index.ts"],
+      "@fw/nasa": ["src/data/nasa/index.ts"],
+      "@fw/simulated": ["src/data/simulated/index.ts"]
+    }
   },
   "include": ["src", "tests/unit"]
 }

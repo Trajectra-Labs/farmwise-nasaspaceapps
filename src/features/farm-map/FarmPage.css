@@ -1,0 +1,99 @@
+.farm-page { max-width: 860px; }
+
+/* ─── Details view ─── */
+.farm-details-view { display: flex; flex-direction: column; gap: var(--space-6); }
+.farm-details-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4) var(--space-10);
+}
+.detail-item { display: flex; flex-direction: column; gap: 3px; }
+.detail-label {
+  font-size: var(--font-size-xs); color: var(--color-secondary);
+  text-transform: uppercase; letter-spacing: 0.04em; font-weight: var(--font-weight-medium);
+}
+.detail-value { font-size: var(--font-size-base); font-weight: var(--font-weight-medium); color: var(--color-primary); }
+.farm-details-notes .detail-value { font-size: var(--font-size-sm); color: var(--color-secondary); }
+.farm-details-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+/* ─── Edit mode ─── */
+.farm-details-edit { display: flex; flex-direction: column; gap: var(--space-6); }
+.farm-details-fields { display: flex; flex-direction: column; gap: var(--space-5); }
+.farm-coord-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.farm-priorities-edit { display: flex; flex-direction: column; gap: var(--space-2); }
+.farm-priority-checks { display: flex; flex-direction: column; gap: var(--space-3); }
+.priority-check-label {
+  display: flex; align-items: center; gap: var(--space-3);
+  font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
+  color: var(--color-primary); cursor: pointer;
+}
+.priority-check-label input { width: 18px; height: 18px; accent-color: var(--color-accent); }
+.farm-details-edit-actions { display: flex; gap: var(--space-3); }
+
+/* ─── Soil panel ─── */
+.soil-panel { display: flex; flex-direction: column; gap: var(--space-6); max-width: 640px; }
+.soil-panel__disclaimer {
+  padding: var(--space-4); background: var(--color-elevated);
+  border-radius: var(--radius-md); border: 1px solid var(--color-border);
+}
+.soil-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+.soil-preset-btn {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: var(--space-1); padding: var(--space-4); min-height: 80px;
+  border-radius: var(--radius-md); border: 1px solid var(--color-border);
+  background: var(--color-elevated); cursor: pointer;
+  font-family: var(--font-family); text-align: left;
+  transition: all var(--transition-fast);
+}
+.soil-preset-btn:hover { border-color: var(--color-accent); }
+.soil-preset-btn--active { border-color: var(--color-accent); background: rgba(32,86,163,0.06); }
+.soil-preset-btn__icon { font-size: 1.4rem; }
+.soil-preset-btn__label { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); color: var(--color-primary); }
+.soil-preset-btn__desc { color: var(--color-secondary); line-height: var(--line-height-normal); }
+.soil-readings-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+.soil-reading-item {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: var(--space-4); background: var(--color-elevated);
+  border-radius: var(--radius-md); border: 1px solid var(--color-border);
+}
+.soil-reading-item__label { font-size: var(--font-size-xs); color: var(--color-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
+.soil-reading-item__value { font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); color: var(--color-accent); }
+.soil-reading-item__meta { }
+
+/* ─── Map panel ─── */
+.farm-map-panel { display: flex; flex-direction: column; gap: var(--space-5); max-width: 600px; }
+.farm-map-confirmed {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-elevated); border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+.farm-map-confirmed__icon { font-size: 1.5rem; }
+.farm-map-placeholder {
+  border-radius: var(--radius-lg); overflow: hidden;
+  border: 1px solid var(--color-border);
+  display: flex; flex-direction: column;
+}
+.farm-map-note {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-elevated);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 600px) {
+  .farm-details-grid { grid-template-columns: 1fr; }
+  .farm-coord-row { grid-template-columns: 1fr; }
+  .soil-presets { grid-template-columns: 1fr; }
+  .soil-readings-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 400px) {
+  .soil-readings-grid { grid-template-columns: 1fr; }
+}
+
+.farm-rotation-list { margin: var(--space-2) 0 0; padding-left: var(--space-6); }
+.farm-rotation-edit { display: flex; flex-direction: column; gap: var(--space-3); align-items: flex-start; }
+.farm-rotation-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: var(--space-3); align-items: end; width: 100%; }
+@media (max-width: 640px) { .farm-rotation-row { grid-template-columns: 1fr 1fr; } }

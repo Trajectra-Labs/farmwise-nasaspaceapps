@@ -1,1 +1,1 @@
-export { ScenarioPage } from './ScenarioPage'
+export { ScenarioPage } from "./ScenarioPage";

@@ -2,6 +2,10 @@
 import { expect, test } from '@playwright/test'
 import { registerCommonChecks } from './helpers/ted-common'
 import { waitForRoute } from './helpers/ted-helpers'
+import { seedState, SAMPLE } from './helpers/seed'
+
+// These checks start from a farm whose location is not set yet.
+test.beforeEach(async ({ page }) => { await seedState(page, { farm: { ...SAMPLE, lat: null as unknown as number, lon: null as unknown as number } }) })
 
 registerCommonChecks({ name: 'farm', path: '/farm' })
 
@@ -53,6 +57,8 @@ test.describe('/farm map picker checks', () => {
 
   test('X01 keyboard: fields and buttons are reachable with a visible focus ring', async ({ page }) => {
     await waitForRoute(page, '/farm')
+    // Switch to keyboard modality: :focus-visible does not show on buttons focused after a mouse click.
+    await page.keyboard.press('Tab')
     for (const el of [lat(page), lon(page), page.getByRole('button', { name: 'Use sample location' })]) {
       await el.focus()
       await expect(el).toBeFocused()

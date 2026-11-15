@@ -1,88 +1,290 @@
-/* Academic Blue design tokens: single source of truth. Light is the default. */
+/*
+ * FarmWise design tokens — Academic Blue, macOS-inspired restraint.
+ * Every shared component reads from these variables. Change a token here,
+ * not a value in a component. Contrast ratios were checked against WCAG 2.2:
+ * text ≥ 4.5:1, control borders and focus indicators ≥ 3:1 (see
+ * SHAHEEM_UI_UX_REFINEMENT_REPORT.md §4).
+ */
+
 :root {
-  --color-bg: #f7f9fc;
-  --color-surface: #ffffff;
-  --color-elevated: #f1f5fb;
-  --color-text: #172842;
-  --color-text-2: #50617a;
-  --color-accent: #2056a3;
-  --color-border: #d6e0ed;
-  --color-on-accent: #ffffff;
+  color-scheme: light;
 
-  --color-success: #1e7a4c;
-  --color-warning: #8a5a00;
-  --color-danger: #b3261e;
-  --color-success-soft: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
-  --color-warning-soft: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
-  --color-danger-soft: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-  --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+  /* ── Typography ─────────────────────────────────────────── */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  --radius-card: 16px;
-  --radius-control: 12px;
+  --text-caption: 13px;   /* sparingly: chart axes, timestamps */
+  --text-sm: 14px;        /* secondary information */
+  --text-base: 16px;      /* body, buttons, labels, nav */
+  --text-md: 17px;        /* lead paragraphs */
+  --text-card-title: 19px;
+  --text-section: 23px;
+  --text-page: 32px;
+  --text-kpi: 34px;
+  --text-hero-kpi: 44px;
 
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-body: 1.55;
+  --tracking-tight: -0.015em;
+  --tracking-normal: 0;
+  --tracking-label: 0.01em;
+
+  --measure: 68ch;        /* comfortable reading width */
+
+  /* ── Spacing scale (4/8/12/16/24/32/48) ─────────────────── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
 
+  /* ── Radii ──────────────────────────────────────────────── */
+  --radius-sm: 8px;       /* badges, chips inside controls */
+  --radius-control: 12px; /* buttons, inputs, tabs */
+  --radius-card: 16px;    /* cards, dialogs, drawers, popovers */
+  --radius-full: 9999px;
+
+  /* ── Component sizing ───────────────────────────────────── */
+  --control-h-sm: 44px;   /* smallest interactive target */
+  --control-h: 48px;
+  --control-h-lg: 52px;
+  --icon-sm: 18px;
+  --icon: 20px;
+  --icon-nav: 20px;
+  --icon-stroke: 1.75;
+  --card-pad: 24px;
+  --card-pad-compact: 20px;
+  --nav-item-h: 48px;
+  --sidebar-width: 264px;
+  --header-height: 60px;
+  --content-max-width: 1200px;
+  --content-pad: 32px;
+  --overlay-pad: 24px;
+
+  /* ── Light colours ──────────────────────────────────────── */
+  --color-bg: #F7F9FC;
+  --color-surface: #FFFFFF;
+  --color-elevated: #F1F5FB;
+  --color-hover: #EAF0F8;
+  --color-primary: #172842;
+  --color-secondary: #50617A;
+  --color-accent: #2056A3;
+  --color-accent-hover: #1A4A8E;
+  --color-accent-soft: #E6EEF9;
+  --color-accent-soft-text: #1A4A8E;
+  --color-on-accent: #FFFFFF;
+  --color-border: #D6E0ED;          /* decorative separators */
+  --color-border-strong: #7D8DA6;   /* control boundaries, ≥3:1 */
+  --color-focus: #2056A3;
+  --color-scrim: rgba(12, 20, 35, 0.45);
+
+  /* Status pairs (fg on bg ≥ 4.5:1) */
+  --color-success: #1A7A4A;
+  --color-success-fg: #155D38;
+  --color-success-bg: #DDF1E4;
+  --color-warning: #8A4A00;
+  --color-warning-fg: #7A4100;
+  --color-warning-bg: #FFF1D6;
+  --color-error: #B3261E;
+  --color-error-fg: #9E2219;
+  --color-error-bg: #FDE4E1;
+  --color-info: #2056A3;
+
+  /* Provenance badges */
+  --color-badge-nasa: #0A3D6B;
+  --color-badge-nasa-bg: #E0EBF8;
+  --color-badge-sim: #5A3D00;
+  --color-badge-sim-bg: #FFF3CD;
+  --color-badge-user: #1A5A1A;
+  --color-badge-user-bg: #D4EDDA;
+  --color-badge-est: #5A1A5A;
+  --color-badge-est-bg: #F3E6F3;
+
+  /* Charts: series colours ≥ 3:1 against the card surface */
+  --chart-1: #2056A3;
+  --chart-2: #6B7A90;
+  --chart-3: #0F7B70;
+  --chart-grid: #E3EAF3;
+  --chart-axis: #50617A;
+
+  /* ── Elevation (restrained) ─────────────────────────────── */
+  --shadow-card: 0 1px 2px rgba(23, 40, 66, 0.05), 0 1px 3px rgba(23, 40, 66, 0.06);
+  --shadow-raised: 0 4px 14px rgba(23, 40, 66, 0.08);
+  --shadow-overlay: 0 20px 48px rgba(12, 20, 35, 0.22);
+
+  /* ── Motion ─────────────────────────────────────────────── */
+  --transition-fast: 120ms ease;
+  --transition-normal: 200ms ease;
+
+  /* ── Layers ─────────────────────────────────────────────── */
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-popover: 350;
+  --z-toast: 500;
+  --z-tooltip: 600;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #0C1423;
+  --color-surface: #152235;
+  --color-elevated: #1C2D43;
+  --color-hover: #22364F;
+  --color-primary: #EAF1FF;
+  --color-secondary: #B7C5DC;
+  --color-accent: #91B9FF;
+  --color-accent-hover: #A8CAFF;
+  --color-accent-soft: #1F3554;
+  --color-accent-soft-text: #A8CAFF;
+  --color-on-accent: #0C1423;
+  --color-border: #2C3D55;
+  --color-border-strong: #6B80A0;
+  --color-focus: #91B9FF;
+  --color-scrim: rgba(3, 7, 15, 0.62);
+
+  --color-success: #6FD69A;
+  --color-success-fg: #8BE3AE;
+  --color-success-bg: #0F2A1B;
+  --color-warning: #FFC46B;
+  --color-warning-fg: #FFD08A;
+  --color-warning-bg: #2E1F05;
+  --color-error: #FF8F85;
+  --color-error-fg: #FFA79F;
+  --color-error-bg: #3A1412;
+  --color-info: #91B9FF;
+
+  --color-badge-nasa: #A8CAFF;
+  --color-badge-nasa-bg: #10284A;
+  --color-badge-sim: #FFD580;
+  --color-badge-sim-bg: #2E2005;
+  --color-badge-user: #8BE3AE;
+  --color-badge-user-bg: #0E2A18;
+  --color-badge-est: #E2B6F0;
+  --color-badge-est-bg: #2A1233;
+
+  --chart-1: #91B9FF;
+  --chart-2: #8D9EB9;
+  --chart-3: #4FC3B4;
+  --chart-grid: #26374F;
+  --chart-axis: #B7C5DC;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-raised: 0 6px 18px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 24px 56px rgba(0, 0, 0, 0.6);
+}
+
+/*
+ * Compatibility aliases. Feature CSS written against the starter tokens keeps
+ * working and inherits the new scale. New code should use the names above.
+ */
+:root {
+  --font-size-xs: var(--text-caption);
+  --font-size-sm: var(--text-sm);
+  --font-size-base: var(--text-base);
+  --font-size-md: var(--text-md);
+  --font-size-lg: var(--text-card-title);
+  --font-size-xl: var(--text-section);
+  --font-size-2xl: var(--text-page);
+  --font-size-3xl: var(--text-page);
+  --font-weight-normal: var(--weight-regular);
+  --font-weight-medium: var(--weight-medium);
+  --font-weight-semibold: var(--weight-semibold);
+  --font-weight-bold: var(--weight-bold);
+  --line-height-tight: var(--leading-tight);
+  --line-height-normal: var(--leading-body);
+  --line-height-relaxed: var(--leading-body);
+  --space-5: var(--space-6);
+  --space-10: var(--space-12);
+  --space-16: var(--space-12);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-card);
+  --radius-xl: var(--radius-card);
+  --shadow-sm: var(--shadow-card);
+  --shadow-md: var(--shadow-raised);
+  --shadow-lg: var(--shadow-raised);
+  --transition-slow: var(--transition-normal);
+  --z-base: 0;
+  --z-dropdown: var(--z-popover);
+  --z-modal: var(--z-overlay);
+}
+
+/*
+ * Compatibility aliases. Rotation Planner, Scenario Studio, Evidence, Map, Plant Check and Soil were
+ * written against two earlier token vocabularies (--fw-* and --color-text/--color-text-2). They are
+ * mapped onto the shared tokens above so those pages follow the same palette in light and dark mode.
+ * New code should use the primary tokens, not these aliases.
+ */
+:root {
+  --color-text: var(--color-primary);
+  --color-text-2: var(--color-secondary);
+  --color-danger: var(--color-error);
+  --color-danger-soft: var(--color-error-bg);
+  --color-success-soft: var(--color-success-bg);
+  --color-warning-soft: var(--color-warning-bg);
   --touch-min: 44px;
-  --sidebar-width: 240px;
-  --content-max: 1200px;
-
-  --shadow-1: 0 1px 2px rgb(23 40 66 / 6%);
-  --shadow-2: 0 8px 24px rgb(23 40 66 / 12%);
-  --shadow-3: 0 16px 48px rgb(23 40 66 / 18%);
-
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-body: 0.9375rem;
-  --font-h1: 1.75rem;
-  --font-h2: 1.25rem;
-  --font-h3: 1rem;
-  --font-caption: 0.8125rem;
-
+  --content-max: var(--content-max-width);
+  --font-sans: var(--font-family);
+  --font-body: var(--text-base);
+  --font-h1: var(--text-page);
+  --font-h2: var(--text-section);
+  --font-h3: var(--text-card-title);
+  --font-caption: var(--text-caption);
+  --shadow-1: var(--shadow-card);
+  --shadow-2: var(--shadow-raised);
+  --shadow-3: var(--shadow-overlay);
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
-  color-scheme: light;
+  --fw-bg: var(--color-bg);
+  --fw-surface: var(--color-surface);
+  --fw-elevated: var(--color-elevated);
+  --fw-text: var(--color-primary);
+  --fw-text-2: var(--color-secondary);
+  --fw-blue: var(--color-accent);
+  --fw-on-blue: var(--color-on-accent);
+  --fw-border: var(--color-border);
+  --fw-border-strong: var(--color-border-strong);
+  --fw-danger: var(--color-error);
+  --fw-danger-bg: var(--color-error-bg);
+  --fw-success: var(--color-success);
+  --fw-success-bg: var(--color-success-bg);
+  --fw-warn: var(--color-warning);
+  --fw-warn-bg: var(--color-warning-bg);
+  --fw-estimate: var(--color-badge-est);
+  --fw-estimate-bg: var(--color-badge-est-bg);
+  --fw-chart-1: var(--chart-1);
+  --fw-chart-2: var(--chart-2);
+  --fw-chart-3: var(--chart-3);
+  --fw-radius-card: var(--radius-card);
+  --fw-radius-control: var(--radius-control);
+  --fw-s1: var(--space-1);
+  --fw-s2: var(--space-2);
+  --fw-s3: var(--space-3);
+  --fw-s4: var(--space-4);
+  --fw-s5: var(--space-6);
+  --fw-s6: var(--space-8);
+  --fw-shadow-1: var(--shadow-card);
+  --fw-shadow-overlay: var(--shadow-overlay);
+  --fw-focus: 0 0 0 3px var(--color-surface), 0 0 0 5px var(--color-focus);
+  --fw-font: var(--font-family);
+  --fw-backdrop: var(--color-scrim);
+  --fw-z-overlay: var(--z-overlay);
+  --fw-z-toast: var(--z-toast);
 }
 
-:root[data-theme='dark'] {
-  --color-bg: #0c1423;
-  --color-surface: #152235;
-  --color-elevated: #1c2d43;
-  --color-text: #f2f6ff;
-  --color-text-2: #b3c2d8;
-  --color-accent: #91b9ff;
-  --color-border: #34455e;
-  --color-on-accent: #0c1423;
-  --color-success: #7bd3a4;
-  --color-warning: #f2c46b;
-  --color-danger: #ff9a92;
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 30%);
-  --shadow-2: 0 8px 24px rgb(0 0 0 / 35%);
-  --shadow-3: 0 16px 48px rgb(0 0 0 / 45%);
-
-  color-scheme: dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --color-bg: #0c1423;
-    --color-surface: #152235;
-    --color-elevated: #1c2d43;
-    --color-text: #f2f6ff;
-    --color-text-2: #b3c2d8;
-    --color-accent: #91b9ff;
-    --color-border: #34455e;
-    --color-on-accent: #0c1423;
-    --color-success: #7bd3a4;
-    --color-warning: #f2c46b;
-    --color-danger: #ff9a92;
-    --shadow-1: 0 1px 2px rgb(0 0 0 / 30%);
-    --shadow-2: 0 8px 24px rgb(0 0 0 / 35%);
-    --shadow-3: 0 16px 48px rgb(0 0 0 / 45%);
-
-    color-scheme: dark;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

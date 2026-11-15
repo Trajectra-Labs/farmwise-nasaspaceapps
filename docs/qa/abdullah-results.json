@@ -1,0 +1,97 @@
+{
+  "owner": "Abdullah",
+  "workstream": "Plant Check and Soil & Sensors",
+  "branch": "abdullah/plant-soil",
+  "baseCommit": "21a78a7887770b4321e38ae1965f60361d5e22d3",
+  "status": "partial_with_integration_blocker",
+  "commands": [
+    {
+      "command": "npx --yes --package=node@24 node node_modules/vitest/vitest.mjs run --pool=threads",
+      "status": "passed",
+      "result": "5 test files passed; 30 tests passed."
+    },
+    {
+      "command": ".\\node_modules\\.bin\\tsc.cmd --noEmit -p tsconfig.app.json",
+      "status": "passed"
+    },
+    {
+      "command": ".\\node_modules\\.bin\\eslint.cmd .",
+      "status": "passed_with_warnings",
+      "result": "0 errors; 4 existing Fast Refresh warnings in shared files."
+    },
+    {
+      "command": ".\\node_modules\\.bin\\vite.cmd build",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    },
+    {
+      "command": "Browser route check at 320 CSS px for /plant and /farm",
+      "status": "passed",
+      "result": "No horizontal overflow; wet preset updated moisture display to 76%."
+    },
+    {
+      "command": "Browser screenshot review",
+      "status": "inspected_not_saved",
+      "result": "Plant Check sample states reviewed in dark desktop and light mobile presentations."
+    }
+  ],
+  "testIds": {
+    "P01": "passed",
+    "P02": "passed",
+    "P03": "passed",
+    "P04": "passed",
+    "P05": "passed",
+    "P06": "passed",
+    "P07": "blocked",
+    "P08": "passed",
+    "P09": "passed",
+    "P10": "passed",
+    "P11": "passed",
+    "P12": "passed",
+    "F05": "passed",
+    "F06": "passed",
+    "F07": "passed"
+  },
+  "screenshots": [
+    {
+      "route": "/plant",
+      "viewport": "desktop",
+      "theme": "dark",
+      "status": "reviewed",
+      "path": null
+    },
+    {
+      "route": "/plant",
+      "viewport": "320 CSS px",
+      "theme": "light",
+      "status": "reviewed",
+      "path": null
+    }
+  ],
+  "failures": [
+    {
+      "testId": "P07",
+      "status": "blocked",
+      "details": "Feedback selection and editing invoke the feature callback, but the current shared store is read-only and has no persisted feedback field/action. The mounted route therefore holds feedback only for the page session."
+    }
+  ],
+  "integrationBlockers": [
+    "Shared store needs write actions for soil preset, known soil, plant observation, and plant feedback before cross-page propagation and persistence can be verified."
+  ],
+  "sourceFixtureNote": {
+    "sensorReadings": "Deterministic illustrative values labeled SIMULATED_IOT; no physical or external sensor is connected.",
+    "sampleImages": "Two original FarmWise SVG illustrations labeled DEMO_IMAGE; neither is a field photograph.",
+    "uploadedPhotos": "Validated and previewed locally; not uploaded or persisted to shared farm data."
+  },
+  "requestedSharedChanges": [
+    "Add typed shared-store update actions for soilPreset, farm.knownSoil, and lastPlantObservation.",
+    "Add a typed shared farmer-feedback field and save/update action equivalent to the feature-local FarmerPlantFeedback type."
+  ],
+  "unverified": [
+    "Shared-state persistence and downstream soil-preset propagation pending Genemor store write actions.",
+    "E2E, axe, and visual-regression suites are absent from the provisional starter."
+  ]
+}

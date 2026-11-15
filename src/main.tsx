@@ -1,16 +1,24 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { routes } from './app/routes'
-import { FarmWiseProvider } from './core'
-import './styles/global.css'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import { FarmWiseProvider } from '@/core/store'
+import { AppShell } from '@/app/AppShell'
+import { AppRouter } from '@/app/Router'
+import { ErrorBoundary } from '@/app/ErrorBoundary'
+import '@/styles/global.css'
 
-const router = createBrowserRouter(routes)
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <FarmWiseProvider>
-      <RouterProvider router={router} />
-    </FarmWiseProvider>
-  </StrictMode>,
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <FarmWiseProvider>
+          <AppShell>
+            <ErrorBoundary>
+              <AppRouter />
+            </ErrorBoundary>
+          </AppShell>
+        </FarmWiseProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  </React.StrictMode>
 )
