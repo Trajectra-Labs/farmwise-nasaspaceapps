@@ -7,7 +7,7 @@ export default defineConfig({
   use: { baseURL: 'http://localhost:4173', channel: 'chrome' },
   // Production build, so dev hot-reload noise is excluded from console checks.
   webServer: {
-    command: 'pnpm build && pnpm preview --port 4173 --strictPort',
+    command: 'npm run build && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

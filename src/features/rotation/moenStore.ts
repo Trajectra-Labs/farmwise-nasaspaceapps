@@ -21,7 +21,11 @@ function seedClimate(farm: FarmWiseState["farm"]): ClimateContext | null {
   if (!farm) return null;
   try {
     const c = getClimateContext(farm) as unknown;
-    return c && typeof (c as { then?: unknown }).then !== "function" ? (c as ClimateContext) : null;
+    if (c && typeof (c as { then?: unknown }).then === "function") {
+      (c as Promise<unknown>).then(undefined, () => undefined); // the effect below makes its own request and reports errors
+      return null;
+    }
+    return c ? (c as ClimateContext) : null;
   } catch {
     return null;
   }

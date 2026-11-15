@@ -36,7 +36,7 @@ function BeforeAfterChart({ data, kind, yLabel, currentLabel, selectedLabel }: {
   return (
     <div className="scn-chart" aria-hidden="true">
       <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 8, left: 8 }} barGap={4} barCategoryGap="22%">
+        <BarChart data={data} margin={{ top: 8, right: 8, bottom: 8, left: 8 }} barGap={4} barCategoryGap="22%" accessibilityLayer={false}>
           <defs>
             <pattern id={hatchId} patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
               <rect width="6" height="6" fill="var(--fw-chart-2)" fillOpacity={0.28} />

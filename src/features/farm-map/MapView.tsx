@@ -61,6 +61,8 @@ export default function MapView({ position, onPick, onTileError, onTileLoad }: M
           position={[position.lat, position.lon]}
           icon={pinIcon}
           draggable
+          // Keyboard users set the location with the latitude/longitude fields; an unnamed focusable marker would only be a tab stop.
+          keyboard={false}
           eventHandlers={{
             dragend(e) {
               const ll = (e.target as L.Marker).getLatLng().wrap()

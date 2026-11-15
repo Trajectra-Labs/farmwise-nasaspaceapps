@@ -415,3 +415,19 @@
 .fw-error-screen__message { font-size: var(--text-md); color: var(--color-secondary); }
 .fw-error-screen__detail { font-size: var(--text-sm); color: var(--color-secondary); font-family: var(--font-mono); overflow-wrap: anywhere; }
 .fw-error-screen__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: center; }
+
+/* ── Compatibility for feature markup that uses the older card/chart class names ── */
+.fw-card:not([class*='fw-card--pad']) { padding: var(--card-pad); }
+.fw-card__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  color: var(--color-primary);
+}
+.fw-chart__header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-3); }
+.fw-chart__header .fw-card__title { margin: 0; }
+.fw-card > .fw-card-header { margin-bottom: var(--space-3); }
+.ev-insight .fw-card-header__title { padding-right: calc(var(--space-6) + var(--space-3)); }
+.plant-check > h1 { margin-bottom: var(--space-2); }
+.plant-check__intro { margin-bottom: var(--space-4); color: var(--color-secondary); }

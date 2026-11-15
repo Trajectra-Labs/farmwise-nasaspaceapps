@@ -16,6 +16,24 @@ const PlantCheckPage = lazy(() => import('@/features/plant/PlantCheckPage').then
 const EvidencePage = lazy(() => import('@/features/evidence/EvidencePage').then(m => ({ default: m.EvidencePage })));
 const OnboardingPage = lazy(() => import('@/features/onboarding/OnboardingPage'));
 
+/** Warm the other route chunks once the first page is idle, so navigation also works with a flaky or lost connection. */
+const prefetchers = [
+  () => import('@/features/dashboard/DashboardPage'),
+  () => import('@/features/farm-map/FarmPage'),
+  () => import('@/features/rotation/RotationPage'),
+  () => import('@/features/scenarios/ScenarioPage'),
+  () => import('@/features/plant/PlantCheckPage'),
+  () => import('@/features/evidence/EvidencePage'),
+];
+function usePrefetchRoutes() {
+  React.useEffect(() => {
+    const run = () => prefetchers.forEach((load) => { load().catch(() => undefined); });
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number };
+    if (w.requestIdleCallback) w.requestIdleCallback(run);
+    else window.setTimeout(run, 1500);
+  }, []);
+}
+
 function PageLoader() {
   return (
     // Layout lives in components.css (.fw-page-loader) so the placeholder follows the content
@@ -38,6 +56,7 @@ function RequireFarm({ children }: { children: React.ReactNode }) {
 }
 
 export function AppRouter() {
+  usePrefetchRoutes();
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>

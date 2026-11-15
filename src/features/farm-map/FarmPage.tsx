@@ -129,7 +129,7 @@ function FarmDetailsPanel({ farm }: { farm: FarmProfile }) {
           <Detail label="Area"       value={farm.areaHa != null ? `${farm.areaHa} ha` : 'Unknown'} />
           <Detail label="Irrigation" value={{ rainfed: 'Rainfed', limited: 'Limited irrigation', regular: 'Regular irrigation' }[farm.irrigation]} />
           <Detail label="Budget"     value={farm.budget != null ? `KES ${farm.budget.toLocaleString('en-US')}` : 'Not specified'} />
-          <Detail label="Priorities" value={farm.priorities.length ? farm.priorities.join(', ') : 'None selected'} />
+          <Detail label="Priorities" value={farm.priorities.length ? farm.priorities.map(p => ({ water: 'Water efficiency', cost: 'Lower costs', soil: 'Soil health' }[p])).join(', ') : 'None selected'} />
         </div>
         <div className="farm-details-notes">
           <span className="detail-label">Crop rotation</span>

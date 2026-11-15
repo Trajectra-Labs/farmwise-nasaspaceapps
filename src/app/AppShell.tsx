@@ -85,6 +85,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-layout">
+      <a className="skip-link" href="#main-content" onClick={(e) => {
+        e.preventDefault();
+        const main = document.getElementById('main-content');
+        main?.focus();
+        main?.scrollIntoView();
+      }}>Skip to main content</a>
       <aside
         id="main-navigation"
         ref={sidebarRef}
@@ -188,6 +194,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <main
           id="main-content"
+          tabIndex={-1}
           className="page-content"
           aria-label={`${getCurrentPageTitle(location.pathname)} page`}
         >

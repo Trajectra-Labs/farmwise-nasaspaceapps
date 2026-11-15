@@ -13,7 +13,7 @@
     "e2e": "playwright test",
     "e2e:ted": "playwright test tests/e2e/ted-",
     "data:nasa": "node scripts/fetch-nasa-power.mjs",
-    "qa": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "qa": "npm run typecheck && npm run lint && npm run test && npm run build && npm run e2e"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
@@ -45,5 +45,8 @@
     "typescript-eslint": "^8.72.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=20.19"
   }
 }

@@ -400,11 +400,11 @@ export default function OnboardingPage() {
           </div>
 
           <TextField
-            label="Annual Budget (USD, optional)"
+            label="Seasonal input budget (KES, optional)"
             type="number"
             value={profile.budget ?? ''}
             onChange={e => setField('budget', e.target.value ? Number(e.target.value) : null)}
-            placeholder="e.g. 1200"
+            placeholder="e.g. 120000"
             hint="Used for feasibility checks only. Keep blank if unknown."
             className="mt-6"
           />

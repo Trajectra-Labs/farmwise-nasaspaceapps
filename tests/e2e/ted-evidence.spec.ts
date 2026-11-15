@@ -2,6 +2,9 @@
 import { expect, test } from '@playwright/test'
 import { registerCommonChecks } from './helpers/ted-common'
 import { waitForRoute } from './helpers/ted-helpers'
+import { seedState } from './helpers/seed'
+
+test.beforeEach(async ({ page }) => { await seedState(page) })
 
 registerCommonChecks({ name: 'evidence', path: '/evidence' })
 
@@ -46,10 +49,13 @@ test.describe('/evidence specific checks', () => {
     expect(reached.has('A typical year')).toBe(true)
     // Activating the link moves the hash and brings the section into view.
     await expect(page).toHaveURL(/#ev-climate$/)
-    const box = await page.locator('#ev-climate').boundingBox()
+    // The app scrolls smoothly, so wait for the scroll animation to bring the section into view.
     const vh = page.viewportSize()!.height
+    await expect
+      .poll(async () => (await page.locator('#ev-climate').boundingBox())?.y ?? Infinity)
+      .toBeLessThan(vh)
+    const box = await page.locator('#ev-climate').boundingBox()
     expect(box).not.toBeNull()
-    expect(box!.y).toBeLessThan(vh)
     expect(box!.y + box!.height).toBeGreaterThan(0)
 
     // Every contents link is reachable by Tab.

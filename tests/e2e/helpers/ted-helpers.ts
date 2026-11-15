@@ -1,6 +1,7 @@
 /// <reference lib="dom" />
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page, type TestInfo } from '@playwright/test'
+import { seedState } from './seed'
 
 export type Theme = 'light' | 'dark'
 export const THEMES: Theme[] = ['light', 'dark']
@@ -10,15 +11,9 @@ export const ROUTES = [
 ] as const
 export const WIDTHS = [320, 375, 768, 1024, 1440]
 
-/** Sets the stored theme before any page script runs. */
+/** Seeds the sample farm and the stored theme before any page script runs. */
 export async function setTheme(page: Page, theme: Theme) {
-  await page.addInitScript((t) => {
-    try {
-      window.localStorage.setItem('farmwise-theme', t)
-    } catch {
-      /* storage unavailable */
-    }
-  }, theme)
+  await seedState(page, { theme })
 }
 
 /** Waits until the route's main content (including the lazy map) has settled. */
@@ -29,6 +24,8 @@ export async function waitForRoute(page: Page, path: string) {
     await expect(page.getByRole('button', { name: /show data table/i }).first()).toBeVisible()
     await page.waitForSelector('.recharts-surface')
   } else {
+    // My Farm hosts the map under its Map tab.
+    await page.getByRole('tab', { name: 'Map' }).click()
     await expect(page.locator('.leaflet-container')).toBeVisible()
   }
   await page.waitForLoadState('networkidle')

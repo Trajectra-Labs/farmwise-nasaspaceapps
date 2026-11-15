@@ -7,12 +7,17 @@
  * built from the shared primitives, so those pages look and behave like the rest of the app
  * without rewriting working feature code. Everything else comes straight from `./index`.
  */
-import { useCallback, useMemo, useRef, type ReactNode } from 'react';
+import { forwardRef, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { useEffect } from 'react';
 import { showToast, useToast as useToastState, TOAST_EVENT, type ToastType } from './toast';
-import { Select as SharedSelect, Slider as SharedSlider, ErrorState as SharedErrorState, ToastContainer } from './components';
+import { Button as SharedButton, Select as SharedSelect, Slider as SharedSlider, ErrorState as SharedErrorState, ToastContainer } from './components';
 
 export * from './index';
+
+/* Button: the planner pages treat an unspecified variant as a secondary (outlined) button. */
+export const Button = forwardRef<HTMLButtonElement, React.ComponentProps<typeof SharedButton>>(function Button(props, ref) {
+  return <SharedButton ref={ref} variant="secondary" {...props} />;
+});
 
 /* Tabs */
 export type TabItem = { id: string; label: string; disabled?: boolean };
