@@ -1,0 +1,8 @@
+/* Moen · PlanSequence styles (self-contained; shared with Scenario Studio). fw tokens only. */
+.rot-seq { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--fw-s1); grid-template-columns: repeat(auto-fill, minmax(min(132px, 100%), 1fr)); }
+.rot-seq__item { display: grid; padding: var(--fw-s2) var(--fw-s3); border-radius: var(--fw-radius-control); background: var(--fw-elevated);
+  border: 1px solid var(--fw-border); min-width: 0; }
+.rot-seq__item--changed { border-color: var(--fw-blue); }
+.rot-seq__when { font-size: 12.5px; color: var(--fw-text-2); overflow-wrap: anywhere; }
+.rot-seq__crop { font-weight: 620; overflow-wrap: anywhere; }
+.rot-seq__note { font-weight: 500; font-size: 12.5px; color: var(--fw-blue); }
