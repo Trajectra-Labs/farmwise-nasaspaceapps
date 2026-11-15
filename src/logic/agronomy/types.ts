@@ -34,6 +34,10 @@ export type CropRule = {
   /** e.g. not allowed / restricted market — a plan using a restricted crop cannot be "safe best". */
   restricted?: string | null;
   sources: SourceRef[];
+  /** (Added) FAO-33 seasonal yield-response factor Ky; default 1.0 when absent. */
+  ky?: number;
+  /** (Added) Commonly grown locally — preferred by the minimum-change plan. */
+  familiar?: boolean;
 };
 
 export type ScoreKey = "water" | "soil" | "cost" | "climate" | "change";
@@ -96,5 +100,8 @@ export type DetailedScenarioResult = ScenarioResult & {
   waterSupplyMm: number | null;
   costBasis: "farm" | "per_ha";
 };
+
+/** (Added) Optional overrides for evaluateRotations — used by tests (e.g. a custom crop manifest). */
+export type EvaluateOptions = { crops?: CropRule[] };
 
 export type { CropSeason, MetricSet };

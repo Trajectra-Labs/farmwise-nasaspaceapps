@@ -91,7 +91,7 @@ export function Tabs({ items, value, onChange, ariaLabel, idBase }: {
     if (next) { e.preventDefault(); onChange(next.id); refs.current[next.id]?.focus(); }
   };
   return (
-    <div role="tablist" aria-label={ariaLabel} className="fw-tabs" onKeyDown={onKey}>
+    <div role="tablist" aria-label={ariaLabel} className="fw-tabs">
       {items.map((t) => (
         <button
           key={t.id}
@@ -105,6 +105,7 @@ export function Tabs({ items, value, onChange, ariaLabel, idBase }: {
           disabled={t.disabled}
           className={cx("fw-tab", value === t.id && "fw-tab--active")}
           onClick={() => onChange(t.id)}
+          onKeyDown={onKey}
         >{t.label}</button>
       ))}
     </div>
@@ -193,18 +194,19 @@ export function Dialog({ open, onClose, title, description, children, footer, si
   useOverlay(open, onClose, panel);
   if (!open) return null;
   return createPortal(
-    <div className="fw-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="fw-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={`${id}-t`} aria-describedby={description ? `${id}-d` : undefined}
         tabIndex={-1} className={cx("fw-dialog", `fw-dialog--${size}`)}>
-        <header className="fw-overlay__head">
+        <div className="fw-overlay__head">
           <div>
             <h2 id={`${id}-t`}>{title}</h2>
             {description ? <div id={`${id}-d`} className="fw-muted">{description}</div> : null}
           </div>
           <IconButton label="Close" onClick={onClose}><CloseIcon /></IconButton>
-        </header>
-        <div className="fw-overlay__body">{children}</div>
-        {footer ? <footer className="fw-overlay__foot">{footer}</footer> : null}
+        </div>
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard-reachable (axe scrollable-region-focusable) */}
+        <div className="fw-overlay__body" role="region" aria-label={`${title} content`} tabIndex={0}>{children}</div>
+        {footer ? <div className="fw-overlay__foot">{footer}</div> : null}
       </div>
     </div>,
     document.body,
@@ -217,17 +219,18 @@ export function Drawer({ open, onClose, title, description, children, footer }: 
   useOverlay(open, onClose, panel);
   if (!open) return null;
   return createPortal(
-    <div className="fw-backdrop fw-backdrop--drawer" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="fw-backdrop fw-backdrop--drawer" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={panel} role="dialog" aria-modal="true" aria-labelledby={`${id}-t`} tabIndex={-1} className="fw-drawer">
-        <header className="fw-overlay__head">
+        <div className="fw-overlay__head">
           <div>
             <h2 id={`${id}-t`}>{title}</h2>
             {description ? <div className="fw-muted">{description}</div> : null}
           </div>
           <IconButton label="Close" onClick={onClose}><CloseIcon /></IconButton>
-        </header>
-        <div className="fw-overlay__body">{children}</div>
-        {footer ? <footer className="fw-overlay__foot">{footer}</footer> : null}
+        </div>
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard-reachable (axe scrollable-region-focusable) */}
+        <div className="fw-overlay__body" role="region" aria-label={`${title} content`} tabIndex={0}>{children}</div>
+        {footer ? <div className="fw-overlay__foot">{footer}</div> : null}
       </div>
     </div>,
     document.body,

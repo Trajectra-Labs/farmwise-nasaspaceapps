@@ -1,4 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
+
+// Browser: Playwright's bundled Chromium download hangs during extraction under Node 26 on the
+// dev machine, so the default here is the installed Google Chrome ("chrome" channel).
+// CI / machines with a working bundled install: set PW_CHANNEL=bundled.
+const channel = process.env.PW_CHANNEL === "bundled" ? undefined : (process.env.PW_CHANNEL ?? "chrome");
+const browser = { ...devices["Desktop Chrome"], channel };
 export default defineConfig({
   testDir: "./tests/moen",
   timeout: 30_000,
@@ -7,8 +13,8 @@ export default defineConfig({
   use: { baseURL: "http://localhost:4173", trace: "retain-on-failure" },
   webServer: { command: "npm run build && npm run preview", url: "http://localhost:4173", reuseExistingServer: !process.env.CI, timeout: 180_000 },
   projects: [
-    { name: "e2e", testMatch: /.*\.e2e\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
-    { name: "a11y", testMatch: /.*\.a11y\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
-    { name: "visual", testMatch: /.*\.visual\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
+    { name: "e2e", testMatch: /.*\.e2e\.spec\.ts/, use: browser },
+    { name: "a11y", testMatch: /.*\.a11y\.spec\.ts/, use: browser },
+    { name: "visual", testMatch: /.*\.visual\.spec\.ts/, use: browser },
   ],
 });
