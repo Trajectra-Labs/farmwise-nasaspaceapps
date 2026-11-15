@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="420" viewBox="0 0 640 420" role="img">
+  <rect width="640" height="420" rx="28" fill="#eaf3e7"/>
+  <path d="M75 332C103 203 206 87 424 64c36 177-65 287-218 296-54 3-99-6-131-28Z" fill="#39834f" stroke="#28643c" stroke-width="8"/>
+  <path d="M101 328C155 253 260 164 410 81M200 249l-34-102m107 61 2-102m26 74 75-63M151 281l-64-18m128-35 86 13m-43-56 70-18" fill="none" stroke="#d7e8ba" stroke-width="8" stroke-linecap="round"/>
+  <path d="M83 325c5-25 16-52 30-80 17 10 34 17 53 21-5 23-10 45-10 66-26 8-50 7-73-7Zm75-133c18-21 38-42 61-61 16 15 31 27 49 36-14 20-29 40-40 61-27-6-50-18-70-36Zm139-78c28-15 58-27 90-36 8 24 13 48 14 74-25 8-49 17-70 31-20-19-31-42-34-69Zm62 144c24-14 49-24 76-31-1 27-8 51-19 73-25 1-49-2-71-9 7-12 12-23 14-33Z" fill="#d9e8a9" opacity=".92"/>
+  <text x="320" y="387" text-anchor="middle" fill="#234932" font-family="system-ui, sans-serif" font-size="18">FarmWise demo illustration</text>
+</svg>
