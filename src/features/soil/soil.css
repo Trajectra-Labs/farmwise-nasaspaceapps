@@ -1,0 +1,179 @@
+.soil-panel {
+  min-width: 0;
+}
+
+.soil-panel__provenance {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.soil-panel__provenance p,
+.soil-panel__test > p,
+.soil-panel__note,
+.soil-panel__timestamp,
+.soil-panel__unknown,
+.soil-panel__integration-note {
+  margin: 0;
+  color: var(--color-text-2);
+}
+
+.soil-panel__integration-note {
+  margin: var(--space-2) 0;
+  font-size: var(--font-caption);
+}
+
+.soil-panel__control {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.soil-panel__control label {
+  font-weight: 600;
+}
+
+.soil-panel__control label span {
+  color: var(--color-text-2);
+  font-weight: 400;
+}
+
+.soil-panel__range {
+  color: var(--color-text-2);
+}
+
+.soil-panel__control input,
+.soil-panel__control select {
+  min-height: var(--touch-min);
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.soil-panel__control input:focus-visible,
+.soil-panel__control select:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.soil-panel__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.soil-panel__section-heading h3 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: var(--font-h3);
+}
+
+.soil-panel__timestamp {
+  margin-bottom: var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+.soil-panel__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.soil-panel__metric {
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-elevated);
+}
+
+.soil-panel__metric dt,
+.soil-panel__saved-values dt {
+  color: var(--color-text-2);
+  font-weight: 600;
+}
+
+.soil-panel__metric dd,
+.soil-panel__saved-values dd {
+  margin: var(--space-1) 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.soil-panel__metric small {
+  color: var(--color-text-2);
+  overflow-wrap: anywhere;
+}
+
+.soil-panel__note {
+  margin-top: var(--space-3);
+}
+
+.soil-panel__test {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.soil-panel__test > p {
+  margin-bottom: var(--space-3);
+}
+
+.soil-panel__form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-3);
+}
+
+.soil-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.soil-panel__saved,
+.soil-panel__confirm {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-elevated);
+}
+
+.soil-panel__saved > p,
+.soil-panel__confirm > p {
+  margin: 0 0 var(--space-2);
+}
+
+.soil-panel__saved-values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.soil-panel__error {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.soil-panel__confirm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.soil-panel__confirm p {
+  flex-basis: 100%;
+}
