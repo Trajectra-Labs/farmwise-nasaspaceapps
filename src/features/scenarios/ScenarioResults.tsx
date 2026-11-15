@@ -55,7 +55,6 @@ export function ResultsTable({ rows, currentLabel, selectedLabel }: { rows: Metr
     </p>
     {/* A scrollable region must be keyboard-focusable
       (WCAG 2.1.1 / axe scrollable-region-focusable). */}
-    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
     <div className="scn-table-wrap" role="region" aria-label="Before and after data table (scrolls horizontally on small screens)" tabIndex={0}>
       <table className="scn-table">
         <caption>Before/after numbers (model estimates)</caption>

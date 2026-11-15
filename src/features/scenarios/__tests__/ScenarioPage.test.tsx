@@ -7,11 +7,27 @@ import { ToastProvider } from "@fw/ui";
 import { DEFAULT_SCENARIO_INPUTS, SCENARIO_LIMITS, SCENARIO_PRESETS } from "../../../logic/agronomy";
 import { ScenarioPage } from "..";
 
+// Climate source switch. "real" returns the bundled synchronous NASA snapshot context; the other
+// modes return a promise so the page goes through its loading and error states.
+const nasa = vi.hoisted(() => ({ mode: "real" as "real" | "fail" | "hold" }));
+vi.mock("@fw/nasa", async (orig) => {
+  const real = await orig<typeof import("@fw/nasa")>();
+  return {
+    ...real,
+    getClimateContext: (farm: Parameters<typeof real.getClimateContext>[0]) => {
+      if (nasa.mode === "fail") return Promise.reject(new Error("NASA snapshot could not be read."));
+      if (nasa.mode === "hold") return new Promise<never>(() => {});
+      return real.getClimateContext(farm);
+    },
+  };
+});
+beforeEach(() => { nasa.mode = "real"; });
+
 function renderPage(init: Partial<FarmWiseState> = {}) {
   return render(
     <FarmWiseProvider initialState={{ farm: SAMPLE_FARM, ...init }}>
       <ToastProvider>
-        <MemoryRouter initialEntries={["/scenarios"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <MemoryRouter initialEntries={["/scenarios"]}>
           <Routes>
             <Route path="/scenarios" element={<ScenarioPage />} />
             <Route path="/onboarding" element={<p>Onboarding route</p>} />
@@ -128,7 +144,7 @@ describe("Scenario Studio", () => {
     for (const f of figures) {
       expect(within(f).getByRole("list", { name: "Legend" })).toHaveTextContent(/hatched bar/);
       expect(within(f).getByText("Model estimate")).toBeInTheDocument();
-      expect(f.querySelector(".fw-chart__summary")?.textContent).toMatch(/Current rotation/);
+      expect(f.querySelector(".fw-chart-frame__summary")?.textContent).toMatch(/Current rotation/);
     }
     expect(screen.getByText(/Water and yield indices, before vs after/)).toBeInTheDocument();
     expect(screen.getByText(/Cost, revenue and net return, before vs after/)).toBeInTheDocument();
@@ -261,7 +277,8 @@ describe("Scenario Studio", () => {
   });
 
   it("climate error shows Retry and Unknown instead of zeros", async () => {
-    renderPage({ farm: { ...SAMPLE_FARM, lat: null, lon: null } });
+    nasa.mode = "fail";
+    renderPage();
     expect(await screen.findByRole("heading", { name: "Climate data unavailable" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
     expect(screen.getAllByText(/Unknown/).length).toBeGreaterThan(0);
@@ -280,9 +297,17 @@ describe("Scenario Studio", () => {
   });
 
   it("climate loading shows skeletons", async () => {
+    nasa.mode = "hold";
     renderPage();
     expect(screen.getAllByRole("status", { name: /Loading climate data|Calculating scenario/ }).length).toBeGreaterThan(0);
     expect(screen.getByTestId("scn-climate-source")).toHaveTextContent("Loading climate data…");
-    await screen.findByRole("heading", { name: "Observed inputs" });
+  });
+
+  it("a farm with no location gets no NASA values and no fabricated zeros", async () => {
+    renderPage({ farm: { ...SAMPLE_FARM, lat: null, lon: null } });
+    await flush();
+    expect(document.body.textContent).not.toMatch(/NaN|Infinity/);
+    expect(screen.getAllByText(/Unknown/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/NASA POWER offline snapshot/)).not.toBeInTheDocument();
   });
 });

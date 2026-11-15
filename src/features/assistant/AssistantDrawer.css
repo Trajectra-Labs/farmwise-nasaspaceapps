@@ -1,0 +1,24 @@
+.assistant-body { display: flex; flex-direction: column; gap: var(--space-5); height: 100%; }
+.assistant-disclaimer { padding: var(--space-4); background: var(--color-elevated); border-radius: var(--radius-md); border: 1px solid var(--color-border); }
+.assistant-conversation { display: flex; flex-direction: column; gap: var(--space-3); max-height: 300px; overflow-y: auto; padding: var(--space-2) 0; }
+.assistant-message { display: flex; flex-direction: column; gap: var(--space-1); }
+.assistant-message--user { align-items: flex-end; }
+.assistant-message--assistant { align-items: flex-start; }
+.assistant-message__role { font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-secondary); }
+.assistant-message__text {
+  max-width: 90%; padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md); font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+.assistant-message--user .assistant-message__text { background: var(--color-accent); color: var(--color-on-accent); border-radius: var(--radius-md) var(--radius-md) var(--radius-sm) var(--radius-md); }
+.assistant-message--assistant .assistant-message__text { background: var(--color-elevated); color: var(--color-primary); border: 1px solid var(--color-border); border-radius: var(--radius-md) var(--radius-md) var(--radius-md) var(--radius-sm); }
+.assistant-faqs { display: flex; flex-direction: column; gap: var(--space-2); }
+.assistant-faqs__label { font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.assistant-faq-btn { text-align: left; padding: var(--space-3) var(--space-4); min-height: 44px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-elevated); color: var(--color-primary); font-family: var(--font-family); font-size: var(--font-size-sm); cursor: pointer; transition: all var(--transition-fast); }
+.assistant-faq-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.assistant-input-row { display: flex; gap: var(--space-2); align-items: stretch; }
+.assistant-input { flex: 1; min-width: 0; }
+/* Shaheem layout pass: in a height:100% flex column the scrollable conversation shrank to a few
+   pixels, hiding the answer. Sections keep their natural height; the drawer body scrolls instead. */
+.assistant-body > * { flex-shrink: 0; }
+.assistant-input-row .fw-btn { min-height: var(--control-h); }

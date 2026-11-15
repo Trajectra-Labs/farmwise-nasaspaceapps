@@ -1,0 +1,211 @@
+.onboarding {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-12);
+}
+
+/* Progress dots */
+.onboarding__progress {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+}
+.onboarding__step-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--color-border);
+  transition: background var(--transition-fast);
+}
+.onboarding__step-dot.active { background: var(--color-accent); }
+.onboarding__step-dot.done { background: var(--color-success); }
+
+/* Welcome screen */
+.onboarding__welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  text-align: center;
+  padding: var(--space-8) 0;
+}
+.onboarding__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+/* Shaheem token pass: icon tiles replace the former emoji glyphs. */
+.onboarding__hero-icon,
+.onboarding__complete-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 64px; height: 64px; border-radius: 18px;
+  background: var(--color-accent); color: var(--color-on-accent);
+}
+.onboarding__complete-icon { background: var(--color-success-bg); color: var(--color-success-fg); }
+.onboarding__welcome-note { display: inline-flex; align-items: center; gap: var(--space-2); }
+.onboarding__priority-icon { display: inline-flex; color: var(--color-accent); }
+.onboarding__hero-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+.onboarding__hero-sub {
+  color: var(--color-secondary);
+  max-width: 480px;
+  line-height: var(--line-height-relaxed);
+}
+.onboarding__revisit-notice {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+}
+.onboarding__welcome-actions {
+  display: flex; gap: var(--space-4); flex-wrap: wrap; justify-content: center;
+}
+.onboarding__welcome-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-secondary);
+}
+
+/* Form card */
+.onboarding__card { width: 100%; }
+
+.onboarding__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.onboarding__coord-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* Voice */
+.onboarding__notes-section { display: flex; flex-direction: column; gap: var(--space-2); }
+.onboarding__notes-header {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+}
+.onboarding__listening-indicator {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(32,86,163,0.08);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+}
+.pulse-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--color-accent);
+  animation: fw-pulse 1s infinite;
+}
+@keyframes fw-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.onboarding__transcript {
+  padding: var(--space-4);
+  background: var(--color-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: flex; flex-direction: column; gap: var(--space-3);
+}
+.onboarding__transcript-label { font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-secondary); text-transform: uppercase; }
+.onboarding__transcript-text { font-size: var(--font-size-sm); font-style: italic; color: var(--color-primary); }
+.onboarding__transcript-actions { display: flex; gap: var(--space-2); }
+
+/* Crops */
+.onboarding__crops-list { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Shaheem layout pass: the single flex row truncated "Long Rains (Mar–Jun)" and "Year 1" at every
+   width. Each season is now a grouped grid: season on its own line, crop + year below.
+   Children: 1 number, 2 season, 3 crop, 4 year, 5 remove button. */
+.onboarding__crop-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 128px 44px;
+  grid-template-areas:
+    "num season season remove"
+    "num crop   year   .";
+  align-items: end;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-elevated);
+}
+.onboarding__crop-row > :nth-child(1) { grid-area: num; align-self: start; margin-top: 30px; }
+.onboarding__crop-row > :nth-child(2) { grid-area: season; }
+.onboarding__crop-row > :nth-child(3) { grid-area: crop; }
+.onboarding__crop-row > :nth-child(4) { grid-area: year; }
+.onboarding__crop-row > :nth-child(5) { grid-area: remove; }
+.onboarding__crop-num {
+  min-width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--font-size-sm); color: var(--color-secondary); font-weight: var(--font-weight-semibold);
+}
+.onboarding__crop-select, .onboarding__crop-select-sm { min-width: 0; }
+.onboarding__voice-controls { flex-shrink: 0; }
+
+/* Priorities */
+.onboarding__priorities { display: flex; flex-direction: column; gap: var(--space-3); }
+.onboarding__priority-option {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-4); border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  cursor: pointer; transition: all var(--transition-fast);
+}
+.onboarding__priority-option:hover { border-color: var(--color-accent); }
+.onboarding__priority-option.selected { border-color: var(--color-accent); background: rgba(32,86,163,0.05); }
+.onboarding__priority-option input { width: 18px; height: 18px; accent-color: var(--color-accent); }
+.onboarding__priority-icon { font-size: 1.5rem; }
+.onboarding__priority-label { font-size: var(--font-size-base); font-weight: var(--font-weight-medium); color: var(--color-primary); }
+
+/* Complete */
+.onboarding__complete {
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--space-5); text-align: center; padding: var(--space-8) 0;
+}
+.onboarding__complete-icon { font-size: 3rem; }
+/* Shaheem token pass: the completion heading uses the section scale and the body copy the reading colour. */
+.onboarding__complete h2 { font-size: var(--text-section); font-weight: var(--weight-bold); line-height: var(--leading-tight, 1.2); color: var(--color-primary); }
+.onboarding__complete > p { color: var(--color-secondary); max-width: 480px; }
+.onboarding__complete-summary {
+  width: 100%; background: var(--color-elevated); border-radius: var(--radius-md);
+  border: 1px solid var(--color-border); padding: var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-3); text-align: left;
+}
+.onboarding__complete-summary div {
+  display: flex; justify-content: space-between; gap: var(--space-4);
+  font-size: var(--font-size-sm);
+}
+.onboarding__complete-summary span { color: var(--color-secondary); }
+.onboarding__complete-summary strong { color: var(--color-primary); }
+
+/* Nav */
+.onboarding__nav {
+  display: flex; justify-content: space-between; gap: var(--space-4);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .onboarding__welcome-actions { flex-direction: column; align-items: stretch; }
+  .onboarding__coord-row { grid-template-columns: 1fr; }
+  .onboarding__crop-row {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-areas:
+      "num    remove"
+      "season season"
+      "crop   year";
+    padding: var(--space-3);
+  }
+  .onboarding__crop-row > :nth-child(1) { align-self: center; margin-top: 0; justify-content: flex-start; }
+  .onboarding__crop-row > :nth-child(5) { justify-self: end; }
+  /* Shaheem layout pass: keep the pin beside the text when the note wraps. */
+  .onboarding__welcome-note { align-items: flex-start; text-align: left; }
+}

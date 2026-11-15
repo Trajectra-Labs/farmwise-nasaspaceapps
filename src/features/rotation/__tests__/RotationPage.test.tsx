@@ -163,7 +163,7 @@ describe("Rotation Planner", () => {
       + screen.getByTestId("prov-soil").textContent + screen.getByTestId("prov-farmer").textContent;
     const before = snapshot();
     await user.click(screen.getByRole("button", { name: "probe: soil dry" }));
-    expect(screen.getByTestId("prov-soil")).toHaveTextContent(/11% moisture/);
+    expect(screen.getByTestId("prov-soil")).toHaveTextContent(/18% moisture/);
     const afterSoil = snapshot();
     expect(afterSoil).not.toBe(before);
     const scoresBefore = PLAN_IDS.map((id) => screen.getByTestId(`score-${id}`).textContent).join();

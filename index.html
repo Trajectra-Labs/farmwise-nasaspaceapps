@@ -6,8 +6,10 @@
     <meta name="color-scheme" content="light dark" />
     <script>
       try {
-        var t = localStorage.getItem("farmwise-theme");
-        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+        var s = JSON.parse(localStorage.getItem("farmwise_state_v3") || "null");
+        var t = s && s.theme;
+        if (t !== "light" && t !== "dark") t = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
       } catch (e) {}
     </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

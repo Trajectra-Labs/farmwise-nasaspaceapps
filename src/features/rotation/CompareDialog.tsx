@@ -31,7 +31,6 @@ export function CompareDialog({ open, onClose, evaluation }: { open: boolean; on
       footer={<Button onClick={onClose}>Close</Button>}
     >
       <div className="rot-compare-wide">
-        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard-scrollable (WCAG 2.1.1) */}
         <div className="rot-table-scroll" role="region" aria-label="Plan comparison table" tabIndex={0}>
           <table className="rot-table rot-compare-table">
             <caption className="rot-sr-only">Comparison of the three rotation plans</caption>

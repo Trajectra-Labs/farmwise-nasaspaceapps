@@ -11,6 +11,21 @@ import { evaluateRotations } from "../../logic/agronomy";
 import type { PlanId, RotationEvaluation } from "../../logic/agronomy/types";
 
 export type ClimateStatus = "loading" | "ready" | "error";
+
+/**
+ * The bundled NASA snapshot is synchronous, so the first render can already have its climate and
+ * plans never flash an unscored, low-confidence state. A mocked or future async source returns a
+ * promise (or throws); then the seed is ignored and the effect below loads it with a loading state.
+ */
+function seedClimate(farm: FarmWiseState["farm"]): ClimateContext | null {
+  if (!farm) return null;
+  try {
+    const c = getClimateContext(farm) as unknown;
+    return c && typeof (c as { then?: unknown }).then !== "function" ? (c as ClimateContext) : null;
+  } catch {
+    return null;
+  }
+}
 export type MoenData = {
   state: FarmWiseState;
   farm: FarmWiseState["farm"];
@@ -30,26 +45,32 @@ export type MoenData = {
 export function useMoenData(): MoenData {
   const { state, actions } = useFarmWise();
   const farm = state.farm;
-  const [climate, setClimate] = useState<ClimateContext | null>(null);
+  const [seed] = useState(() => seedClimate(farm));
+  const skipFirstLoading = useRef(seed !== null);
+  const [climate, setClimate] = useState<ClimateContext | null>(seed);
   /** Which coordinates the stored climate belongs to (REV-20). */
-  const [climateKey, setClimateKey] = useState<string | null>(null);
-  const [climateStatus, setClimateStatus] = useState<ClimateStatus>("loading");
+  const [climateKey, setClimateKey] = useState<string | null>(seed ? `${farm?.lat ?? null},${farm?.lon ?? null}` : null);
+  const [climateStatus, setClimateStatus] = useState<ClimateStatus>(seed ? "ready" : "loading");
   const [climateError, setClimateError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   // Refetch only when the location changes (or on retry) — budget/irrigation/rotation edits must not
   // refetch or blank climate. The latest farm is read through a ref so the effect deps stay narrow.
   const farmRef = useRef(farm);
-  farmRef.current = farm;
+  useEffect(() => { farmRef.current = farm; });
   const lat = farm?.lat ?? null;
   const lon = farm?.lon ?? null;
   const hasFarm = farm != null;
   useEffect(() => {
     let alive = true;
-    setClimateStatus("loading"); // keep the last good climate visible while refetching
+    if (skipFirstLoading.current) skipFirstLoading.current = false;
+    // The statuses below mirror an async source, which is what effects are for.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    else setClimateStatus("loading"); // keep the last good climate visible while refetching
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setClimateError(null);
     Promise.resolve()
-      .then(() => getClimateContext(farmRef.current))
+      .then(() => { if (!farmRef.current) throw new Error('No farm selected.'); return getClimateContext(farmRef.current); })
       .then((c) => { if (alive) { setClimate(c); setClimateKey(`${lat},${lon}`); setClimateStatus("ready"); } })
       .catch((e: unknown) => {
         if (!alive) return;

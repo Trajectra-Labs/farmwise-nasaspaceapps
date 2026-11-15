@@ -67,7 +67,7 @@ export function SoilSensorsPanel({
   onPresetChange,
   onSoilTestChange,
 }: SoilSensorsPanelProps) {
-  const farmWise = useFarmWise()
+  const { state: farmWise } = useFarmWise()
   const [localPreset, setLocalPreset] = useState<SoilPreset>(farmWise.soilPreset)
   const [localSoilTest, setLocalSoilTest] = useState<SoilInput | null>(
     farmWise.farm?.knownSoil?.source === 'USER_SOIL_TEST' ? farmWise.farm.knownSoil : null,

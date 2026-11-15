@@ -56,7 +56,7 @@ function BeforeAfterChart({ data, kind, yLabel, currentLabel, selectedLabel }: {
             contentStyle={{ background: "var(--fw-surface)", border: "1px solid var(--fw-border)", borderRadius: 12, color: "var(--fw-text)", whiteSpace: "normal" }}
             labelStyle={{ color: "var(--fw-text)", fontWeight: 600 }}
             itemStyle={{ color: "var(--fw-text)" }}
-            formatter={(v: number) => fmtValue(kind, v)}
+            formatter={(v) => fmtValue(kind, Number(v))}
           />
           <Bar dataKey="current" name={currentLabel} fill="var(--fw-chart-1)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
           <Bar dataKey="selected" name={selectedLabel} fill={`url(#${hatchId})`} stroke="var(--fw-chart-2)" strokeWidth={1.5}

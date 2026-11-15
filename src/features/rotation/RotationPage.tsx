@@ -171,7 +171,6 @@ export function RotationPage() {
             {evaluation.recommendedId ? evaluation.recommendationReason : `No plan is recommended: ${evaluation.recommendationReason}`}
           </p>
         </div>
-        {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus -- roving tabindex: the checked radio inside is focusable */}
         <div ref={groupRef} className="rot-grid" role="radiogroup" aria-label="Choose a rotation plan" onKeyDown={onGroupKey}>
             {plans.map((p) => (
               <PlanCard

@@ -72,7 +72,6 @@ export function PlanDetails({ plan, evaluation, recommended, onUse, onWhy }: {
           The score is a relative 0–100 comparison of these three plans for this farm, not a certified soil test or a yield promise.
           Each part is weighted; parts with missing inputs are shown as “Unknown”.
         </p>
-        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard-scrollable (WCAG 2.1.1) */}
         <div className="rot-table-scroll" role="region" aria-label="Score breakdown table" tabIndex={0}>
           <table className="rot-table rot-table--stack">
             <thead>

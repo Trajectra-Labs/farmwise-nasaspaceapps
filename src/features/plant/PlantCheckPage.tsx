@@ -57,15 +57,19 @@ function stopStream(stream: MediaStream | null) {
 
 export function PlantCheckPage({
   initialObservation,
-  onObservationChange,
-  onFeedbackChange,
+  onObservationChange: onObservationChangeProp,
+  onFeedbackChange: onFeedbackChangeProp,
 }: PlantCheckPageProps) {
-  const farmWise = useFarmWise()
+  const { state: farmWise, actions } = useFarmWise()
+  // Integration: results and farmer feedback are saved to the shared FarmWise state by default,
+  // so the assistant and Dashboard see the latest Plant Check. Props still override for tests.
+  const onObservationChange = onObservationChangeProp ?? actions.setPlantObservation
+  const onFeedbackChange = onFeedbackChangeProp ?? actions.setPlantFeedback
   const [photo, setPhoto] = useState<SelectedPhoto | null>(null)
   const [observation, setObservation] = useState<PlantObservation | null>(
     initialObservation ?? farmWise.lastPlantObservation ?? null,
   )
-  const [feedback, setFeedback] = useState<FarmerPlantFeedback | null>(null)
+  const [feedback, setFeedback] = useState<FarmerPlantFeedback | null>(farmWise.plantFeedback ?? null)
   const [selectedSymptoms, setSelectedSymptoms] = useState<SymptomId[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [cameraMessage, setCameraMessage] = useState('')
