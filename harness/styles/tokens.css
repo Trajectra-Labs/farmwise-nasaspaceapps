@@ -1,0 +1,40 @@
+/* HARNESS stand-in for Shaheem's src/styles — Academic Blue tokens from PRD §5. */
+:root {
+  --fw-bg: #F7F9FC; --fw-surface: #FFFFFF; --fw-elevated: #F1F5FB;
+  --fw-text: #172842; --fw-text-2: #50617A; --fw-blue: #2056A3; --fw-on-blue: #FFFFFF;
+  --fw-border: #D6E0ED; --fw-border-strong: #8A9BB3;
+  --fw-danger: #B42318; --fw-danger-bg: #FDECEA; --fw-success: #1E6B3A; --fw-success-bg: #E6F4EA;
+  --fw-warn: #8A5300; --fw-warn-bg: #FFF4DE; --fw-estimate: #6B3FA0; --fw-estimate-bg: #F2ECFA;
+  --fw-chart-1: #2056A3; --fw-chart-2: #C2571A; --fw-chart-3: #1E6B3A;
+  --fw-radius-card: 16px; --fw-radius-control: 12px;
+  --fw-s1: 4px; --fw-s2: 8px; --fw-s3: 12px; --fw-s4: 16px; --fw-s5: 24px; --fw-s6: 32px;
+  --fw-shadow-1: 0 1px 2px rgba(23,40,66,.06), 0 1px 3px rgba(23,40,66,.08);
+  --fw-shadow-overlay: 0 12px 40px rgba(23,40,66,.22);
+  --fw-focus: 0 0 0 3px #FFFFFF, 0 0 0 5px #2056A3;
+  --fw-font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fw-z-overlay: 1000; --fw-z-toast: 1100;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --fw-bg: #0C1423; --fw-surface: #152235; --fw-elevated: #1C2D43;
+  --fw-text: #F2F6FF; --fw-text-2: #B3C2D8; --fw-blue: #91B9FF; --fw-on-blue: #0C1423;
+  --fw-border: #34455E; --fw-border-strong: #6F84A3;
+  --fw-danger: #FF9C94; --fw-danger-bg: #3A1D20; --fw-success: #8FD6A6; --fw-success-bg: #163324;
+  --fw-warn: #FFC970; --fw-warn-bg: #3A2C12; --fw-estimate: #CDB3F5; --fw-estimate-bg: #2B2142;
+  --fw-chart-1: #91B9FF; --fw-chart-2: #FFAA70; --fw-chart-3: #8FD6A6;
+  --fw-shadow-1: 0 1px 2px rgba(0,0,0,.4); --fw-shadow-overlay: 0 12px 40px rgba(0,0,0,.6);
+  --fw-focus: 0 0 0 3px #0C1423, 0 0 0 5px #91B9FF;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--fw-bg); color: var(--fw-text); font-family: var(--fw-font); font-size: 15px; line-height: 1.5; }
+body { overflow-x: hidden; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 var(--fw-s2); font-weight: 650; }
+h2 { font-size: 20px; line-height: 1.3; margin: 0 0 var(--fw-s2); font-weight: 620; }
+h3 { font-size: 16px; line-height: 1.35; margin: 0 0 var(--fw-s1); font-weight: 600; }
+p { margin: 0 0 var(--fw-s2); }
+a { color: var(--fw-blue); }
+:focus-visible { outline: none; box-shadow: var(--fw-focus); border-radius: 6px; }
+.fw-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.fw-muted { color: var(--fw-text-2); }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

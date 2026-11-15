@@ -1,0 +1,615 @@
+{
+ "dataset": "NASA POWER monthly point (community=AG)",
+ "requestUrl": "https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M,PRECTOTCORR&community=AG&longitude=36.07&latitude=-0.30&start=2015&end=2024&format=JSON",
+ "lat": -0.3,
+ "lon": 36.07,
+ "period": "2015-01 to 2024-12",
+ "retrievedAt": "2026-11-15T02:45:18Z",
+ "variables": {
+  "T2M": "Temperature at 2 Meters (C, monthly mean)",
+  "PRECTOTCORR": "Precipitation Corrected (mm/day monthly mean; converted to mm/month = mm/day x days in month)"
+ },
+ "spatialScale": "NASA POWER grid cell (~0.5 x 0.625 degree MERRA-2 / 0.1 degree IMERG-based), regional \u2014 not a field measurement",
+ "months": [
+  {
+   "month": "2015-01",
+   "t2mC": 16.73,
+   "precipMm": 12.7
+  },
+  {
+   "month": "2015-02",
+   "t2mC": 18.01,
+   "precipMm": 28.8
+  },
+  {
+   "month": "2015-03",
+   "t2mC": 17.39,
+   "precipMm": 76.9
+  },
+  {
+   "month": "2015-04",
+   "t2mC": 16.34,
+   "precipMm": 291.0
+  },
+  {
+   "month": "2015-05",
+   "t2mC": 15.44,
+   "precipMm": 172.7
+  },
+  {
+   "month": "2015-06",
+   "t2mC": 15.11,
+   "precipMm": 81.9
+  },
+  {
+   "month": "2015-07",
+   "t2mC": 14.67,
+   "precipMm": 49.9
+  },
+  {
+   "month": "2015-08",
+   "t2mC": 15.1,
+   "precipMm": 31.0
+  },
+  {
+   "month": "2015-09",
+   "t2mC": 15.77,
+   "precipMm": 43.5
+  },
+  {
+   "month": "2015-10",
+   "t2mC": 16.38,
+   "precipMm": 129.9
+  },
+  {
+   "month": "2015-11",
+   "t2mC": 15.79,
+   "precipMm": 293.1
+  },
+  {
+   "month": "2015-12",
+   "t2mC": 15.59,
+   "precipMm": 194.4
+  },
+  {
+   "month": "2016-01",
+   "t2mC": 15.96,
+   "precipMm": 106.0
+  },
+  {
+   "month": "2016-02",
+   "t2mC": 16.26,
+   "precipMm": 22.6
+  },
+  {
+   "month": "2016-03",
+   "t2mC": 17.53,
+   "precipMm": 60.4
+  },
+  {
+   "month": "2016-04",
+   "t2mC": 16.75,
+   "precipMm": 272.7
+  },
+  {
+   "month": "2016-05",
+   "t2mC": 15.48,
+   "precipMm": 168.6
+  },
+  {
+   "month": "2016-06",
+   "t2mC": 14.69,
+   "precipMm": 68.1
+  },
+  {
+   "month": "2016-07",
+   "t2mC": 13.99,
+   "precipMm": 64.8
+  },
+  {
+   "month": "2016-08",
+   "t2mC": 14.07,
+   "precipMm": 56.7
+  },
+  {
+   "month": "2016-09",
+   "t2mC": 14.97,
+   "precipMm": 74.1
+  },
+  {
+   "month": "2016-10",
+   "t2mC": 15.78,
+   "precipMm": 61.7
+  },
+  {
+   "month": "2016-11",
+   "t2mC": 15.47,
+   "precipMm": 183.6
+  },
+  {
+   "month": "2016-12",
+   "t2mC": 15.55,
+   "precipMm": 17.4
+  },
+  {
+   "month": "2017-01",
+   "t2mC": 16.21,
+   "precipMm": 15.5
+  },
+  {
+   "month": "2017-02",
+   "t2mC": 17.26,
+   "precipMm": 43.1
+  },
+  {
+   "month": "2017-03",
+   "t2mC": 18.33,
+   "precipMm": 51.8
+  },
+  {
+   "month": "2017-04",
+   "t2mC": 16.93,
+   "precipMm": 151.8
+  },
+  {
+   "month": "2017-05",
+   "t2mC": 15.54,
+   "precipMm": 178.2
+  },
+  {
+   "month": "2017-06",
+   "t2mC": 15.68,
+   "precipMm": 33.0
+  },
+  {
+   "month": "2017-07",
+   "t2mC": 14.82,
+   "precipMm": 128.0
+  },
+  {
+   "month": "2017-08",
+   "t2mC": 14.68,
+   "precipMm": 102.3
+  },
+  {
+   "month": "2017-09",
+   "t2mC": 15.06,
+   "precipMm": 133.8
+  },
+  {
+   "month": "2017-10",
+   "t2mC": 15.86,
+   "precipMm": 168.0
+  },
+  {
+   "month": "2017-11",
+   "t2mC": 15.31,
+   "precipMm": 209.7
+  },
+  {
+   "month": "2017-12",
+   "t2mC": 15.32,
+   "precipMm": 22.6
+  },
+  {
+   "month": "2018-01",
+   "t2mC": 15.65,
+   "precipMm": 14.6
+  },
+  {
+   "month": "2018-02",
+   "t2mC": 16.98,
+   "precipMm": 28.0
+  },
+  {
+   "month": "2018-03",
+   "t2mC": 15.6,
+   "precipMm": 305.0
+  },
+  {
+   "month": "2018-04",
+   "t2mC": 15.19,
+   "precipMm": 483.6
+  },
+  {
+   "month": "2018-05",
+   "t2mC": 14.74,
+   "precipMm": 346.0
+  },
+  {
+   "month": "2018-06",
+   "t2mC": 13.99,
+   "precipMm": 184.2
+  },
+  {
+   "month": "2018-07",
+   "t2mC": 13.08,
+   "precipMm": 74.4
+  },
+  {
+   "month": "2018-08",
+   "t2mC": 13.45,
+   "precipMm": 110.7
+  },
+  {
+   "month": "2018-09",
+   "t2mC": 14.14,
+   "precipMm": 33.0
+  },
+  {
+   "month": "2018-10",
+   "t2mC": 14.88,
+   "precipMm": 89.6
+  },
+  {
+   "month": "2018-11",
+   "t2mC": 15.55,
+   "precipMm": 89.1
+  },
+  {
+   "month": "2018-12",
+   "t2mC": 15.14,
+   "precipMm": 170.5
+  },
+  {
+   "month": "2019-01",
+   "t2mC": 15.08,
+   "precipMm": 28.8
+  },
+  {
+   "month": "2019-02",
+   "t2mC": 15.98,
+   "precipMm": 11.2
+  },
+  {
+   "month": "2019-03",
+   "t2mC": 17.26,
+   "precipMm": 31.0
+  },
+  {
+   "month": "2019-04",
+   "t2mC": 17.67,
+   "precipMm": 127.8
+  },
+  {
+   "month": "2019-05",
+   "t2mC": 15.7,
+   "precipMm": 141.7
+  },
+  {
+   "month": "2019-06",
+   "t2mC": 15.3,
+   "precipMm": 160.5
+  },
+  {
+   "month": "2019-07",
+   "t2mC": 14.47,
+   "precipMm": 67.9
+  },
+  {
+   "month": "2019-08",
+   "t2mC": 14.68,
+   "precipMm": 122.8
+  },
+  {
+   "month": "2019-09",
+   "t2mC": 15.22,
+   "precipMm": 113.7
+  },
+  {
+   "month": "2019-10",
+   "t2mC": 15.37,
+   "precipMm": 292.0
+  },
+  {
+   "month": "2019-11",
+   "t2mC": 15.79,
+   "precipMm": 283.5
+  },
+  {
+   "month": "2019-12",
+   "t2mC": 15.49,
+   "precipMm": 365.8
+  },
+  {
+   "month": "2020-01",
+   "t2mC": 15.27,
+   "precipMm": 197.5
+  },
+  {
+   "month": "2020-02",
+   "t2mC": 15.66,
+   "precipMm": 108.5
+  },
+  {
+   "month": "2020-03",
+   "t2mC": 16.34,
+   "precipMm": 225.4
+  },
+  {
+   "month": "2020-04",
+   "t2mC": 15.77,
+   "precipMm": 394.8
+  },
+  {
+   "month": "2020-05",
+   "t2mC": 14.95,
+   "precipMm": 183.8
+  },
+  {
+   "month": "2020-06",
+   "t2mC": 14.01,
+   "precipMm": 220.8
+  },
+  {
+   "month": "2020-07",
+   "t2mC": 13.37,
+   "precipMm": 81.5
+  },
+  {
+   "month": "2020-08",
+   "t2mC": 14.09,
+   "precipMm": 114.7
+  },
+  {
+   "month": "2020-09",
+   "t2mC": 14.31,
+   "precipMm": 213.0
+  },
+  {
+   "month": "2020-10",
+   "t2mC": 14.81,
+   "precipMm": 163.7
+  },
+  {
+   "month": "2020-11",
+   "t2mC": 15.38,
+   "precipMm": 186.0
+  },
+  {
+   "month": "2020-12",
+   "t2mC": 14.69,
+   "precipMm": 74.4
+  },
+  {
+   "month": "2021-01",
+   "t2mC": 14.55,
+   "precipMm": 57.4
+  },
+  {
+   "month": "2021-02",
+   "t2mC": 15.18,
+   "precipMm": 84.0
+  },
+  {
+   "month": "2021-03",
+   "t2mC": 15.4,
+   "precipMm": 71.3
+  },
+  {
+   "month": "2021-04",
+   "t2mC": 15.83,
+   "precipMm": 211.5
+  },
+  {
+   "month": "2021-05",
+   "t2mC": 15.35,
+   "precipMm": 266.9
+  },
+  {
+   "month": "2021-06",
+   "t2mC": 14.24,
+   "precipMm": 20.4
+  },
+  {
+   "month": "2021-07",
+   "t2mC": 13.5,
+   "precipMm": 101.4
+  },
+  {
+   "month": "2021-08",
+   "t2mC": 14.04,
+   "precipMm": 91.1
+  },
+  {
+   "month": "2021-09",
+   "t2mC": 14.84,
+   "precipMm": 86.4
+  },
+  {
+   "month": "2021-10",
+   "t2mC": 15.59,
+   "precipMm": 109.4
+  },
+  {
+   "month": "2021-11",
+   "t2mC": 15.79,
+   "precipMm": 102.9
+  },
+  {
+   "month": "2021-12",
+   "t2mC": 15.27,
+   "precipMm": 126.8
+  },
+  {
+   "month": "2022-01",
+   "t2mC": 15.1,
+   "precipMm": 64.5
+  },
+  {
+   "month": "2022-02",
+   "t2mC": 16.45,
+   "precipMm": 56.0
+  },
+  {
+   "month": "2022-03",
+   "t2mC": 16.9,
+   "precipMm": 79.0
+  },
+  {
+   "month": "2022-04",
+   "t2mC": 16.41,
+   "precipMm": 148.2
+  },
+  {
+   "month": "2022-05",
+   "t2mC": 15.89,
+   "precipMm": 98.3
+  },
+  {
+   "month": "2022-06",
+   "t2mC": 14.47,
+   "precipMm": 52.8
+  },
+  {
+   "month": "2022-07",
+   "t2mC": 13.93,
+   "precipMm": 111.6
+  },
+  {
+   "month": "2022-08",
+   "t2mC": 14.05,
+   "precipMm": 179.5
+  },
+  {
+   "month": "2022-09",
+   "t2mC": 14.75,
+   "precipMm": 141.0
+  },
+  {
+   "month": "2022-10",
+   "t2mC": 15.43,
+   "precipMm": 43.7
+  },
+  {
+   "month": "2022-11",
+   "t2mC": 15.34,
+   "precipMm": 170.4
+  },
+  {
+   "month": "2022-12",
+   "t2mC": 15.39,
+   "precipMm": 84.6
+  },
+  {
+   "month": "2023-01",
+   "t2mC": 15.04,
+   "precipMm": 21.1
+  },
+  {
+   "month": "2023-02",
+   "t2mC": 16.73,
+   "precipMm": 23.8
+  },
+  {
+   "month": "2023-03",
+   "t2mC": 16.85,
+   "precipMm": 186.6
+  },
+  {
+   "month": "2023-04",
+   "t2mC": 16.08,
+   "precipMm": 274.2
+  },
+  {
+   "month": "2023-05",
+   "t2mC": 15.63,
+   "precipMm": 146.0
+  },
+  {
+   "month": "2023-06",
+   "t2mC": 15.29,
+   "precipMm": 79.5
+  },
+  {
+   "month": "2023-07",
+   "t2mC": 14.62,
+   "precipMm": 39.7
+  },
+  {
+   "month": "2023-08",
+   "t2mC": 15.07,
+   "precipMm": 62.0
+  },
+  {
+   "month": "2023-09",
+   "t2mC": 16.16,
+   "precipMm": 133.5
+  },
+  {
+   "month": "2023-10",
+   "t2mC": 16.25,
+   "precipMm": 168.0
+  },
+  {
+   "month": "2023-11",
+   "t2mC": 15.39,
+   "precipMm": 458.4
+  },
+  {
+   "month": "2023-12",
+   "t2mC": 16.02,
+   "precipMm": 106.6
+  },
+  {
+   "month": "2024-01",
+   "t2mC": 15.55,
+   "precipMm": 204.3
+  },
+  {
+   "month": "2024-02",
+   "t2mC": 16.06,
+   "precipMm": 81.2
+  },
+  {
+   "month": "2024-03",
+   "t2mC": 16.78,
+   "precipMm": 153.1
+  },
+  {
+   "month": "2024-04",
+   "t2mC": 16.12,
+   "precipMm": 627.9
+  },
+  {
+   "month": "2024-05",
+   "t2mC": 15.97,
+   "precipMm": 392.2
+  },
+  {
+   "month": "2024-06",
+   "t2mC": 14.5,
+   "precipMm": 69.0
+  },
+  {
+   "month": "2024-07",
+   "t2mC": 14.38,
+   "precipMm": 151.0
+  },
+  {
+   "month": "2024-08",
+   "t2mC": 14.07,
+   "precipMm": 85.6
+  },
+  {
+   "month": "2024-09",
+   "t2mC": 14.67,
+   "precipMm": 102.0
+  },
+  {
+   "month": "2024-10",
+   "t2mC": 15.31,
+   "precipMm": 68.8
+  },
+  {
+   "month": "2024-11",
+   "t2mC": 15.68,
+   "precipMm": 353.7
+  },
+  {
+   "month": "2024-12",
+   "t2mC": 15.11,
+   "precipMm": 124.9
+  }
+ ]
+}
